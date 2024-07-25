@@ -1,0 +1,10 @@
+/slinput_config.h
+/Makefile
+/install_manifest.txt
+/CMakeCache.txt
+/cmake_install.cmake
+/src/
+/lib/
+/CMakeFiles/
+/bin/
+/_deps/
