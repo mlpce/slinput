@@ -9,6 +9,7 @@
 #include <wctype.h>
 #include <wchar.h>
 #include <errno.h>
+#include <limits.h>
 
 #include "include/slinput.h"
 #include "src/slinput_internal.h"
@@ -437,7 +438,7 @@ int SLINPUT_CreateStreams_Default(
   if (input == NULL)
     return -1;
 
-  input->buffer_size = (SLINPUT_MAX_COLUMNS * MB_CUR_MAX) + 1;
+  input->buffer_size = (SLINPUT_MAX_COLUMNS * MB_LEN_MAX) + 1;
   input->buffer = term_info->malloc_in(term_info->alloc_info,
     input->buffer_size);
   if (input->buffer == NULL) {
