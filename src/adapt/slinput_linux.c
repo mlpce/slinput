@@ -41,7 +41,6 @@ int SLINPUT_EnterRaw_Default(
       term_info->malloc_in(term_info->alloc_info, sizeof(term_attr));
     if (prev_term_attr) {
       *prev_term_attr = term_attr;
-      original_term_attr->term_attr_data = prev_term_attr;
 
       term_attr.c_iflag &= ~((tcflag_t)(IGNBRK | BRKINT | PARMRK | ISTRIP |
         INLCR | IGNCR | ICRNL | IXON));
@@ -51,8 +50,13 @@ int SLINPUT_EnterRaw_Default(
       term_attr.c_cflag |= CS8;
       term_attr.c_cc[VMIN] = 1;
       term_attr.c_cc[VTIME] = 0;
-      if (tcsetattr(fd, TCSAFLUSH, &term_attr) == -1)
+      result = tcsetattr(fd, TCSAFLUSH, &term_attr);
+      if (result == -1) {
         result = -errno;
+        term_info->free_in(term_info->alloc_info, prev_term_attr);
+      } else {
+        original_term_attr->term_attr_data = prev_term_attr;
+      }
     } else {
       result = -1;
     }
