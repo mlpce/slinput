@@ -129,7 +129,7 @@ static __regsused("d0/d1/a0/a1") LONG LineAParameterBlock(VOID) =
   "\tmove.l\t(sp)+,d2\n";
 
 int SLINPUT_GetTerminalWidth_Default(const SLINPUT_State *state,
-    SLINPUT_Stream stream_out, uint16_t *width) {
+    SLINPUT_Stream stream_in, uint16_t *width) {
   *width = 0;
   const char *env_columns = getenv("SLINPUT_COLUMNS");
   if (env_columns) {

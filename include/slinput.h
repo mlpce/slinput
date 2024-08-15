@@ -222,13 +222,13 @@ typedef int SLINPUT_Flush(
 /**
  * Determines the width of the terminal in columns.
  * @param[in] state the state pointer created by SLINPUT_CreateState.
- * @param[in] stream_out the output stream specified by SLINPUT_Set_Streams.
+ * @param[in] stream_in the input stream specified by SLINPUT_Set_Streams.
  * @param[out] width the width of the terminal.
  * @return negative value on error, 0 on success.
  */
 typedef int SLINPUT_GetTerminalWidth(
   const SLINPUT_State *state,
-  SLINPUT_Stream stream_out,
+  SLINPUT_Stream stream_in,
   uint16_t *width);
 
 /**
