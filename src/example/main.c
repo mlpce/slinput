@@ -21,20 +21,22 @@ static int completion_request(SLINPUT_State *state,
 }
 
 int main(int argc, char **argv) {
+  SLINPUT_AllocInfo alloc_info = { NULL };
+  SLINPUT_CompletionInfo completion_info = { NULL };
+  int result = 1;
+  SLINPUT_State *state;
+  SLICHAR buffer[256];
+
   if (setlocale(LC_CTYPE, "") == NULL)
     return EXIT_FAILURE;
 
-  SLINPUT_AllocInfo alloc_info = { NULL };
-  SLINPUT_State *state = SLINPUT_CreateState(alloc_info, NULL, NULL);
+  state = SLINPUT_CreateState(alloc_info, NULL, NULL);
   if (state == NULL)
     return EXIT_FAILURE;
 
-  SLINPUT_CompletionInfo completion_info = { NULL };
   SLINPUT_Set_CompletionRequest(state, completion_info,
     completion_request);
 
-  SLICHAR buffer[256];
-  int result = 1;
   while (result > 0) {
     result = SLINPUT_Get(state, L"> ", NULL, sizeof(buffer)/sizeof(buffer[0]),
       buffer);

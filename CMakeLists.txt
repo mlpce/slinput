@@ -8,6 +8,8 @@ else()
   project(slinput VERSION 1.0 LANGUAGES C)
 endif()
 
+set(CMAKE_C_STANDARD 90)
+
 # slinput headers and source code directories
 include_directories(".")
 add_subdirectory(src)

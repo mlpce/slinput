@@ -126,6 +126,7 @@ static int LineEnter(SLINPUT_State *state) {
 static int RedrawLine(SLINPUT_State *state) {
   const TermInfo *term_info = &state->term_info;
   const LineInfo *line_info = &state->line_info;
+  ptrdiff_t num_chars;
   /* Clear line and place cursor on left, output the prompt,
   output text up to cursor, save cursor position, output the
   buffer, restore cursor position */
@@ -149,7 +150,7 @@ static int RedrawLine(SLINPUT_State *state) {
   result = Minimum(result,
     term_info->cursor_control_out(state, term_info->stream_out,
     SLINPUT_CCC_SAVE_CURSOR));
-  const ptrdiff_t num_chars = line_info->fit_len + line_info->scroll_ptr -
+  num_chars = line_info->fit_len + line_info->scroll_ptr -
     line_info->cursor_ptr;
   result = Minimum(result,
     OutputMaxChars(state, num_chars, line_info->cursor_ptr));
@@ -175,6 +176,7 @@ position */
 static int RedrawLineFromCursor(SLINPUT_State *state) {
   const TermInfo *term_info = &state->term_info;
   const LineInfo *line_info = &state->line_info;
+  ptrdiff_t num_chars;
   /* Clear to end of line, save cursor position,
   output string at cursor_ptr, restore cursor position. */
   int result = term_info->cursor_control_out(state, term_info->stream_out,
@@ -185,7 +187,7 @@ static int RedrawLineFromCursor(SLINPUT_State *state) {
   result = Minimum(result,
     term_info->cursor_control_out(state, term_info->stream_out,
     SLINPUT_CCC_SAVE_CURSOR));
-  const ptrdiff_t num_chars = line_info->fit_len + line_info->scroll_ptr -
+  num_chars = line_info->fit_len + line_info->scroll_ptr -
     line_info->cursor_ptr;
   result = Minimum(result,
     OutputMaxChars(state, num_chars, line_info->cursor_ptr));
@@ -213,7 +215,8 @@ static int LineBackspace(SLINPUT_State *state) {
 
   int result = 0;
   if (line_info->cursor_ptr > line_info->buffer)  {
-    for (SLICHAR *ptr = --line_info->cursor_ptr; ptr < line_info->end_ptr;
+    SLICHAR *ptr;
+    for (ptr = --line_info->cursor_ptr; ptr < line_info->end_ptr;
         ++ptr) {
       *ptr = *(ptr+1);
     }
@@ -263,8 +266,8 @@ static int LineEscape(SLINPUT_State *state) {
 static int LineEndOfTransmission(SLINPUT_State *state) {
   LineEscape(state);
 
-  SLINPUT_Stream stream = state->term_info.stream_out;
-  return (*state->term_info.putchar_out)(state, stream, L'\n');
+  return (*state->term_info.putchar_out)(state,
+    state->term_info.stream_out, L'\n');
 }
 
 /* Delete the current character, cursor does not move */
@@ -272,7 +275,8 @@ static int LineDelete(SLINPUT_State *state) {
   LineInfo *line_info = &state->line_info;
   int result = 0;
   if (line_info->cursor_ptr < line_info->end_ptr) {
-    for (SLICHAR *ptr = line_info->cursor_ptr; ptr < line_info->end_ptr; ++ptr)
+    SLICHAR *ptr;
+    for (ptr = line_info->cursor_ptr; ptr < line_info->end_ptr; ++ptr)
       *ptr = *(ptr+1);
     --line_info->end_ptr;
     result = RedrawLineFromCursor(state);
@@ -301,6 +305,10 @@ static int LineKeyLeft(SLINPUT_State *state, int cursor_warp_enabled) {
   const TermInfo *term_info = &state->term_info;
   LineInfo *line_info = &state->line_info;
   const SLICHAR *orig_cursor_ptr = line_info->cursor_ptr;
+  int result = 0;
+  SLICHAR *original_scroll_ptr;
+  ptrdiff_t left_delta;
+
   if (!cursor_warp_enabled ||
       line_info->cursor_ptr <= line_info->buffer + 1) {
     if (line_info->cursor_ptr > line_info->buffer)
@@ -324,16 +332,15 @@ static int LineKeyLeft(SLINPUT_State *state, int cursor_warp_enabled) {
   }
 
   /* Adjust scroll pointer if necessary */
-  const SLICHAR *original_scroll_ptr = line_info->scroll_ptr;
-  const ptrdiff_t left_delta = line_info->scroll_ptr +
-    line_info->cursor_margin - line_info->cursor_ptr;
+  original_scroll_ptr = line_info->scroll_ptr;
+  left_delta = line_info->scroll_ptr + line_info->cursor_margin -
+    line_info->cursor_ptr;
   if (left_delta > 0) {
     line_info->scroll_ptr -= left_delta;
     if (line_info->scroll_ptr < line_info->buffer)
       line_info->scroll_ptr = line_info->buffer;
   }
 
-  int result = 0;
   if (line_info->scroll_ptr != original_scroll_ptr) {
     /* Scroll pointer has changed so redraw the line */
     result = RedrawLine(state);
@@ -354,8 +361,11 @@ rightwards until first letter of word. */
 static int LineKeyRight(SLINPUT_State *state, int cursor_warp_enabled) {
   const TermInfo *term_info = &state->term_info;
   LineInfo *line_info = &state->line_info;
-
   const SLICHAR *orig_cursor_ptr = line_info->cursor_ptr;
+  int result = 0;
+  SLICHAR *original_scroll_ptr;
+  ptrdiff_t right_delta;
+
   if (!cursor_warp_enabled ||
       line_info->cursor_ptr >= line_info->end_ptr - 1) {
     if (line_info->cursor_ptr < line_info->end_ptr)
@@ -379,8 +389,8 @@ static int LineKeyRight(SLINPUT_State *state, int cursor_warp_enabled) {
   }
 
   /* Adjust scroll pointer if necessary */
-  const SLICHAR *original_scroll_ptr = line_info->scroll_ptr;
-  const ptrdiff_t right_delta = line_info->cursor_ptr - line_info->scroll_ptr -
+  original_scroll_ptr = line_info->scroll_ptr;
+  right_delta = line_info->cursor_ptr - line_info->scroll_ptr -
     line_info->fit_len + line_info->cursor_margin;
   if (right_delta > 0) {
     line_info->scroll_ptr += right_delta;
@@ -391,7 +401,6 @@ static int LineKeyRight(SLINPUT_State *state, int cursor_warp_enabled) {
     }
   }
 
-  int result = 0;
   if (line_info->scroll_ptr != original_scroll_ptr) {
     /* Scroll pointer has changed so redraw the line */
     result = RedrawLine(state);
@@ -432,12 +441,14 @@ static int LineCharIn(SLINPUT_State *state, SLICHAR char_in) {
 
   int result = 0;
   if (line_info->end_ptr - line_info->buffer < line_info->max_chars) {
-    for (SLICHAR *ptr = line_info->end_ptr; ptr > line_info->cursor_ptr; --ptr)
+    ptrdiff_t working_margin;
+    SLICHAR *ptr;
+    for (ptr = line_info->end_ptr; ptr > line_info->cursor_ptr; --ptr)
       *ptr = *(ptr-1);
     *line_info->cursor_ptr++ = char_in;
     *++line_info->end_ptr = L'\0';
 
-    ptrdiff_t working_margin = line_info->end_ptr - line_info->cursor_ptr;
+    working_margin = line_info->end_ptr - line_info->cursor_ptr;
     if (working_margin > line_info->cursor_margin)
       working_margin = line_info->cursor_margin;
 
@@ -495,10 +506,12 @@ static size_t StringLength(const SLICHAR *str) {
 static int ApplyDimension(SLINPUT_State *state, const SLICHAR *prompt) {
   const TermInfo *term_info = &state->term_info;
   LineInfo *line_info = &state->line_info;
-
-  int result = 0;
-  /* If columns_in is zero query the terminal width through the callback */
   uint16_t columns = term_info->columns_in;
+  int result = 0;
+  size_t prompt_length;
+  uint16_t cursor_margin;
+
+  /* If columns_in is zero query the terminal width through the callback */
   if (!columns) {
     result =
       term_info->get_terminal_width(state, term_info->stream_in, &columns);
@@ -530,8 +543,8 @@ static int ApplyDimension(SLINPUT_State *state, const SLICHAR *prompt) {
   priority. Secondly we then prioritise the prompt. Thirdly, the cursor
   margin, as this just provides a scrolling convenience. */
 
-  size_t prompt_length = StringLength(line_info->prompt_in);
-  uint16_t cursor_margin = term_info->cursor_margin_in;
+  prompt_length = StringLength(line_info->prompt_in);
+  cursor_margin = term_info->cursor_margin_in;
 
   /* First, can we fit in the prompt and cursor margin? */
   if (prompt_length + cursor_margin >= columns) {
@@ -604,28 +617,28 @@ static int FlushInput(SLINPUT_State *state) {
 /* Processes input until enter is pressed or end of transmission */
 static int ProcessInput(SLINPUT_State *state, const SLICHAR *prompt) {
   const TermInfo *term_info = &state->term_info;
+  const int16_t max_history_index = term_info->num_history - 1;
+  int16_t history_index = -1;
+  int result;
 
   /* Disable line wrap */
   term_info->cursor_control_out(state, state->term_info.stream_out,
     SLINPUT_CCC_WRAP_OFF);
 
-  const int16_t max_history_index = term_info->num_history - 1;
-  int16_t history_index = -1;
-
   /* Initial dimensions and line draw */
-  int result = ApplyDimension(state, prompt);
+  result = ApplyDimension(state, prompt);
   if (result >= 0)
     result = RedrawLine(state);
 
   while (result >= 0) {
+    SLINPUT_KeyCode key_code = SLINPUT_KC_NUL;
+    SLICHAR char_in = 0;
     CheckState(state);
 
     result = term_info->flush_out(state, term_info->stream_out);
     if (result < 0)
       break;
 
-    SLINPUT_KeyCode key_code = SLINPUT_KC_NUL;
-    SLICHAR char_in = 0;
     result = term_info->get_char_in_in(state, term_info->stream_in, &key_code,
       &char_in);
     if (result < 0)
@@ -727,11 +740,15 @@ static int ProcessInput(SLINPUT_State *state, const SLICHAR *prompt) {
 loop executed. On completion the previous terminal mode is restored. */
 int SLINPUT_Get(SLINPUT_State *state, const SLICHAR *prompt,
     const SLICHAR *initial, uint16_t buffer_chars, SLICHAR *buffer) {
+  const TermInfo *term_info;
+  LineInfo *line_info;
+  int result;
+
   if (!state || !prompt || !buffer_chars || !buffer)
     return -1;
 
-  const TermInfo *term_info = &state->term_info;
-  LineInfo *line_info = &state->line_info;
+  term_info = &state->term_info;
+  line_info = &state->line_info;
 
   line_info->prompt_in = prompt;
   line_info->prompt = prompt;
@@ -749,7 +766,7 @@ int SLINPUT_Get(SLINPUT_State *state, const SLICHAR *prompt,
   }
 
   /* Enter raw mode */
-  int result = term_info->enter_raw_in(state, term_info->stream_in,
+  result = term_info->enter_raw_in(state, term_info->stream_in,
     &state->term_info.saved_term_attr_in);
   if (result < 0)
     return result;
@@ -792,7 +809,10 @@ int SLINPUT_Save(SLINPUT_State *state, const SLICHAR *line) {
   const size_t line_length = StringLength(line);
   const SLICHAR *line_end = line + line_length;
   size_t reduced_line_length = 0;
-  for (const SLICHAR *ptr = line; ptr < line_end; ++ptr) {
+  const SLICHAR *ptr;
+  SLICHAR *save_line;
+  SLICHAR *dest_ptr;
+  for (ptr = line; ptr < line_end; ++ptr) {
     if (*ptr != L'\r' && *ptr != L'\n')
       ++reduced_line_length;
   }
@@ -801,15 +821,15 @@ int SLINPUT_Save(SLINPUT_State *state, const SLICHAR *line) {
     return term_info->num_history;
 
   /* Allocate and copy the line with newlines removed */
-  SLICHAR *save_line = term_info->malloc_in(term_info->alloc_info,
+  save_line = term_info->malloc_in(term_info->alloc_info,
     sizeof(SLICHAR)*(reduced_line_length + 1));
   if (!save_line) {
     /* Out of memory */
     return -1;
   }
 
-  SLICHAR *dest_ptr = save_line;
-  for (const SLICHAR *ptr = line; ptr < line_end; ++ptr) {
+  dest_ptr = save_line;
+  for (ptr = line; ptr < line_end; ++ptr) {
     if (*ptr != L'\r' && *ptr != L'\n')
       *dest_ptr++ = *ptr;
   }
@@ -824,8 +844,9 @@ int SLINPUT_Save(SLINPUT_State *state, const SLICHAR *line) {
 
   /* If history is full, then delete the oldest */
   if (term_info->num_history == SLINPUT_MAX_HISTORY) {
+    uint16_t index;
     term_info->free_in(term_info->alloc_info, term_info->history[0]);
-    for (uint16_t index = 1; index < SLINPUT_MAX_HISTORY; ++index)
+    for (index = 1; index < SLINPUT_MAX_HISTORY; ++index)
       term_info->history[index - 1] = term_info->history[index];
 
     term_info->num_history--;
@@ -936,19 +957,22 @@ void SLINPUT_Set_Streams(SLINPUT_State *state,
 SLINPUT_State *SLINPUT_CreateState(
     SLINPUT_AllocInfo alloc_info,
     SLINPUT_Malloc malloc_cb, SLINPUT_Free free_cb) {
+  SLINPUT_CompletionInfo completion_info = { NULL };
+  SLINPUT_State *state;
+  TermInfo *term_info;
+
   if (!malloc_cb)
     malloc_cb = SLINPUT_Malloc_Default;
   if (!free_cb)
     free_cb = SLINPUT_Free_Default;
 
-  SLINPUT_State *state =
-    (*malloc_cb)(alloc_info, sizeof(SLINPUT_State));
+  state = (*malloc_cb)(alloc_info, sizeof(SLINPUT_State));
   if (!state)
     return NULL;
 
   MemorySet(state, 0, sizeof(SLINPUT_State));
 
-  TermInfo *term_info = &state->term_info;
+  term_info = &state->term_info;
   term_info->alloc_info = alloc_info;
   term_info->malloc_in = malloc_cb;
   term_info->free_in = free_cb;
@@ -972,7 +996,6 @@ SLINPUT_State *SLINPUT_CreateState(
   SLINPUT_Set_Putchar(state, SLINPUT_Putchar_Default);
   SLINPUT_Set_Flush(state, SLINPUT_Flush_Default);
   SLINPUT_Set_GetTerminalWidth(state, SLINPUT_GetTerminalWidth_Default);
-  SLINPUT_CompletionInfo completion_info = { NULL };
   SLINPUT_Set_CompletionRequest(state, completion_info, NULL);
 
   SLINPUT_Set_NumColumns(state, 0);
@@ -985,15 +1008,18 @@ SLINPUT_State *SLINPUT_CreateState(
 
 /* Destroys the state */
 void SLINPUT_DestroyState(SLINPUT_State *state) {
+  TermInfo *term_info;
+  uint16_t index;
+
   if (!state)
     return;
 
-  TermInfo *term_info = &state->term_info;
+  term_info = &state->term_info;
 
   SLINPUT_DestroyStreams_Default(state, &term_info->stream_in_default,
     &term_info->stream_out_default);
 
-  for (uint16_t index = 0; index < term_info->num_history; ++index)
+  for (index = 0; index < term_info->num_history; ++index)
     term_info->free_in(term_info->alloc_info, term_info->history[index]);
 
   term_info->free_in(term_info->alloc_info, state);

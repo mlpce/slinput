@@ -30,9 +30,9 @@ int SLINPUT_EnterRaw_Default(
   const LinuxInputStream *input = (LinuxInputStream *) stream_in.stream_data;
   const int fd = fileno(input->file);
   struct termios term_attr;
-  original_term_attr->term_attr_data = NULL;
-
   int result = tcgetattr(fd, &term_attr);
+
+  original_term_attr->term_attr_data = NULL;
   if (result == -1) {
     result = -errno;
   } else {
@@ -69,6 +69,7 @@ int SLINPUT_LeaveRaw_Default(
     const SLINPUT_State *state,
     SLINPUT_Stream stream_in,
     SLINPUT_TermAttr previous_attr) {
+  const TermInfo *term_info = &state->term_info;
   const LinuxInputStream *input = (LinuxInputStream *) stream_in.stream_data;
   const int fd = fileno(input->file);
   struct termios *prev_term_attr =
@@ -80,7 +81,6 @@ int SLINPUT_LeaveRaw_Default(
       result = -errno;
   }
 
-  const TermInfo *term_info = &state->term_info;
   term_info->free_in(term_info->alloc_info, prev_term_attr);
   return result;
 }
@@ -124,14 +124,15 @@ static const CharMapping M_CharMapping[] = {
 static int IsCharAvailableOnFd(LinuxInputStream *input) {
   const int fd = fileno(input->file);
   fd_set readfds;
-  FD_ZERO(&readfds);
-  FD_SET(fd, &readfds);
-
   struct timeval timeout;
+  int sel_rv;
   timeout.tv_sec = 0;
   timeout.tv_usec = 0;
 
-  int sel_rv = select(fd + 1, &readfds, NULL, NULL, &timeout);
+  FD_ZERO(&readfds);
+  FD_SET(fd, &readfds);
+
+  sel_rv = select(fd + 1, &readfds, NULL, NULL, &timeout);
   if (sel_rv == -1)
     sel_rv = -errno;
 
@@ -145,6 +146,9 @@ int SLINPUT_GetCharIn_Default(
     SLINPUT_KeyCode *key_code,
     SLICHAR *character) {
   LinuxInputStream *input = (LinuxInputStream *) stream_in.stream_data;
+  int result = 0;
+  SLINPUT_KeyCode key_code_input = SLINPUT_KC_NUL;
+  SLICHAR wchar_input = L'\0';
 
   if (key_code)
     *key_code = SLINPUT_KC_NUL;
@@ -152,16 +156,15 @@ int SLINPUT_GetCharIn_Default(
   if (character)
     *character = '\0';
 
-  int result = 0;
   if (input->buffer_read_index == input->buffer_write_index) {
     /* More input required */
-    input->buffer_read_index = 0;
-    input->buffer_write_index = 0;
-
     const int fd = fileno(input->file);
     char char_in = '\0';
     /* Blocking read */
     ssize_t bytes_read = read(fd, &char_in, 1);
+    input->buffer_read_index = 0;
+    input->buffer_write_index = 0;
+
     if (bytes_read == -1) {
       /* Error */
       result = -errno;
@@ -212,20 +215,20 @@ int SLINPUT_GetCharIn_Default(
   }
 
   if (0) {
+    size_t i;
     printf("BUFFER: ");
-    for (size_t i = input->buffer_read_index;
+    for (i = input->buffer_read_index;
         i < input->buffer_write_index; ++i) {
       printf("0x%x ", input->buffer[i]);
     }
     printf("\n");
   }
 
-  SLINPUT_KeyCode key_code_in = SLINPUT_KC_NUL;
-  SLICHAR wchar_input = L'\0';
   if (input->buffer[input->buffer_read_index] == '\033' &&
       input->buffer_write_index - input->buffer_read_index > 1) {
     /* escape sequence */
-    for (int16_t sequence_mapping_index = 0;
+    int16_t sequence_mapping_index;
+    for (sequence_mapping_index = 0;
         M_SequenceMapping[sequence_mapping_index].sequence;
         ++sequence_mapping_index) {
       const size_t sequence_len =
@@ -234,7 +237,7 @@ int SLINPUT_GetCharIn_Default(
           sequence_len && strncmp(input->buffer,
           M_SequenceMapping[sequence_mapping_index].sequence,
           sequence_len) == 0) {
-        key_code_in =
+        key_code_input =
           M_SequenceMapping[sequence_mapping_index].key_code_mapped;
         break;
       }
@@ -245,23 +248,23 @@ int SLINPUT_GetCharIn_Default(
   } else {
     /* Input character(s) */
     /* Check if it's a mapping */
-    for (int16_t char_mapping_index = 0;
+    int16_t char_mapping_index;
+    for (char_mapping_index = 0;
         M_CharMapping[char_mapping_index].char_in; ++char_mapping_index) {
       if (input->buffer[input->buffer_read_index] ==
           M_CharMapping[char_mapping_index].char_in) {
-        key_code_in = M_CharMapping[char_mapping_index].key_code_mapped;
+        key_code_input = M_CharMapping[char_mapping_index].key_code_mapped;
         ++input->buffer_read_index;
         break;
       }
     }
 
-    if (key_code_in == SLINPUT_KC_NUL) {
+    if (key_code_input == SLINPUT_KC_NUL) {
       const char *src_ptr = &input->buffer[input->buffer_read_index];
       wchar_t convert[2] = { L'\0' };
       mbstate_t mbs;
       memset(&mbs, 0, sizeof(mbs));
-      const size_t num_wchars = mbsrtowcs(convert, &src_ptr, 1, &mbs);
-      if (num_wchars == (size_t) -1) {
+      if (mbsrtowcs(convert, &src_ptr, 1, &mbs) == (size_t) -1) {
         result = -errno;
       } else {
         wchar_input = convert[0];
@@ -278,7 +281,7 @@ int SLINPUT_GetCharIn_Default(
   }
 
   if (key_code)
-    *key_code = key_code_in;
+    *key_code = key_code_input;
 
   if (character)
     *character = wchar_input;
@@ -319,17 +322,19 @@ static char *WideCharToChar(
     const SLINPUT_State *state,
     const wchar_t *wide_string,
     size_t *num_mchars_out) {
+  const TermInfo *term_info = &state->term_info;
+  const wchar_t *w_ptr = wide_string;
+  size_t num_mchars;
+  mbstate_t mbs;
+  char *multibyte_buffer;
   *num_mchars_out = 0;
 
-  const wchar_t *w_ptr = wide_string;
-  mbstate_t mbs;
   memset(&mbs, 0, sizeof(mbs));
-  const size_t num_mchars = wcsrtombs(NULL, &w_ptr, 0, &mbs);
+  num_mchars = wcsrtombs(NULL, &w_ptr, 0, &mbs);
   if (num_mchars == (size_t) -1)
     return NULL;
 
-  const TermInfo *term_info = &state->term_info;
-  char *multibyte_buffer = term_info->malloc_in(term_info->alloc_info,
+  multibyte_buffer = term_info->malloc_in(term_info->alloc_info,
     num_mchars + 1);
   if (multibyte_buffer) {
     w_ptr = wide_string;
@@ -363,10 +368,12 @@ int SLINPUT_CursorControl_Default(
     const SLINPUT_State *state,
     SLINPUT_Stream stream_out,
     SLINPUT_CursorControlCode cursor_control_code) {
+  const char *code;
+
   if (cursor_control_code >= SLINPUT_CCC_MAX)
     return -1;
 
-  const char *code = SLINPUT_CursorControlTable[cursor_control_code];
+  code = SLINPUT_CursorControlTable[cursor_control_code];
   return fprintf((FILE *)stream_out.stream_data, "%s", code);
 }
 
@@ -374,13 +381,19 @@ int SLINPUT_Putchar_Default(
     const SLINPUT_State *state,
     SLINPUT_Stream stream_out,
     SLICHAR c) {
-  wchar_t wide_string[2] = { c, L'\0' };
   size_t num_mchars = 0;
-  char *multibyte_buffer = WideCharToChar(state, wide_string, &num_mchars);
+  char *multibyte_buffer;
+  wchar_t wide_string[2];
+  int result;
+
+  wide_string[0] = c;
+  wide_string[1] = L'\0';
+
+  multibyte_buffer = WideCharToChar(state, wide_string, &num_mchars);
   if (multibyte_buffer == NULL)
     return -1;
 
-  int result = fprintf((FILE *)stream_out.stream_data, "%s", multibyte_buffer);
+  result = fprintf((FILE *)stream_out.stream_data, "%s", multibyte_buffer);
   free(multibyte_buffer);
 
   if ((size_t) result == num_mchars)
@@ -407,8 +420,10 @@ int SLINPUT_GetTerminalWidth_Default(
     uint16_t *width) {
   LinuxInputStream *input = (LinuxInputStream *) stream_in.stream_data;
   const int fd = fileno(input->file);
-  *width = 0;
   const char *env_columns = getenv("SLINPUT_COLUMNS");
+  int result = 0;
+
+  *width = 0;
   if (env_columns) {
     int env_columns_number = atoi(env_columns);
     if (env_columns_number >= SLINPUT_MIN_COLUMNS &&
@@ -417,7 +432,6 @@ int SLINPUT_GetTerminalWidth_Default(
     }
   }
 
-  int result = 0;
   if (!*width) {
     struct winsize ws;
     result = ioctl(fd, TIOCGWINSZ, &ws);

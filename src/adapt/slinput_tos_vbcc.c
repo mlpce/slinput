@@ -130,8 +130,8 @@ static __regsused("d0/d1/a0/a1") LONG LineAParameterBlock(VOID) =
 
 int SLINPUT_GetTerminalWidth_Default(const SLINPUT_State *state,
     SLINPUT_Stream stream_in, uint16_t *width) {
-  *width = 0;
   const char *env_columns = getenv("SLINPUT_COLUMNS");
+  *width = 0;
   if (env_columns) {
     int env_columns_number = atoi(env_columns);
     if (env_columns_number >= SLINPUT_MIN_COLUMNS &&
@@ -180,9 +180,10 @@ int SLINPUT_CursorControl_Default(
     const SLINPUT_State *state,
     SLINPUT_Stream stream_out,
     SLINPUT_CursorControlCode cursor_control_code) {
+  const char *code;
   if (cursor_control_code >= SLINPUT_CCC_MAX)
     return -1;
 
-  const char *code = SLINPUT_CursorControlTable[cursor_control_code];
+  code = SLINPUT_CursorControlTable[cursor_control_code];
   return fprintf((FILE *)stream_out.stream_data, "%s", code);
 }
