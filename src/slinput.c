@@ -4,7 +4,7 @@
 #include <assert.h>
 
 #include "include/slinput.h"
-#include "src/slinput_internal.h"
+#include "src/slinputi.h"
 
 /* Check pointers are within expected ranges */
 static void CheckState(SLINPUT_State *state) {

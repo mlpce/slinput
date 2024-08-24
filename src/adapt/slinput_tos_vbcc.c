@@ -4,7 +4,7 @@
 #include <tos.h>
 
 #include "include/slinput.h"
-#include "src/slinput_internal.h"
+#include "src/slinputi.h"
 
 static long os_Cnecin(void) {
   return Cnecin();

@@ -12,7 +12,7 @@
 #include <limits.h>
 
 #include "include/slinput.h"
-#include "src/slinput_internal.h"
+#include "src/slinputi.h"
 
 /** Input stream state */
 typedef struct LinuxInputStream {
