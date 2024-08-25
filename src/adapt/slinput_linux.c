@@ -227,7 +227,7 @@ int SLINPUT_GetCharIn_Default(
   if (input->buffer[input->buffer_read_index] == '\033' &&
       input->buffer_write_index - input->buffer_read_index > 1) {
     /* escape sequence */
-    int16_t sequence_mapping_index;
+    size_t sequence_mapping_index;
     for (sequence_mapping_index = 0;
         M_SequenceMapping[sequence_mapping_index].sequence;
         ++sequence_mapping_index) {
@@ -248,7 +248,7 @@ int SLINPUT_GetCharIn_Default(
   } else {
     /* Input character(s) */
     /* Check if it's a mapping */
-    int16_t char_mapping_index;
+    size_t char_mapping_index;
     for (char_mapping_index = 0;
         M_CharMapping[char_mapping_index].char_in; ++char_mapping_index) {
       if (input->buffer[input->buffer_read_index] ==
@@ -417,7 +417,7 @@ int SLINPUT_Flush_Default(
 int SLINPUT_GetTerminalWidth_Default(
     const SLINPUT_State *state,
     SLINPUT_Stream stream_in,
-    uint16_t *width) {
+    sli_ushort *width) {
   LinuxInputStream *input = (LinuxInputStream *) stream_in.stream_data;
   const int fd = fileno(input->file);
   const char *env_columns = getenv("SLINPUT_COLUMNS");
@@ -428,7 +428,7 @@ int SLINPUT_GetTerminalWidth_Default(
     int env_columns_number = atoi(env_columns);
     if (env_columns_number >= SLINPUT_MIN_COLUMNS &&
         env_columns_number <= SLINPUT_MAX_COLUMNS) {
-      *width = (uint16_t) env_columns_number;
+      *width = (sli_ushort) env_columns_number;
     }
   }
 

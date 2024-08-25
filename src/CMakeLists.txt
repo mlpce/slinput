@@ -17,7 +17,9 @@ check_type_size("wchar_t" SIZEOF_WCHAR_T LANGUAGE C)
 file(WRITE ${CMAKE_BINARY_DIR}/slinput_config.h
 "#ifndef SLINPUT_CONFIG
 #define SLINPUT_CONFIG
-typedef wchar_t slichar;
+typedef wchar_t sli_char;
+typedef signed short sli_sshort;
+typedef unsigned short sli_ushort;
 #define SLICHAR_SIZE ${SIZEOF_WCHAR_T}
 #endif
 "

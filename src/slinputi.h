@@ -84,9 +84,9 @@ typedef struct TermInfo {
   SLINPUT_CompletionInfo completion_info;  /**< Completion callback info */
   SLINPUT_CompletionRequest *completion_request;  /**< Callback pointer */
   sli_char *history[SLINPUT_MAX_HISTORY];  /**< Holds pointers to saved lines */
-  int16_t num_history;  /**< The number of entries in the history array */
-  uint16_t columns_in;  /**< The number of columns, zero uses width callback */
-  uint16_t cursor_margin_in;  /**< The cursor margin for scrolling to occur */
+  sli_sshort num_history;  /**< The number of entries in the history array */
+  sli_ushort columns_in;  /**< The number of columns, zero uses width callback */
+  sli_ushort cursor_margin_in;  /**< The cursor margin for scrolling to occur */
   sli_char continuation_character_left;  /**< Printed when left scrollable */
   sli_char continuation_character_right;  /**< Printed when right scrollable */
 } TermInfo;
@@ -95,15 +95,15 @@ typedef struct TermInfo {
 typedef struct LineInfo {
   const sli_char *prompt_in;   /**< Original prompt */
   const sli_char *prompt;      /**< Prompt to render at start of line */
-  uint16_t buffer_size;       /**< Size of memory buffer in bytes */
-  uint16_t max_chars;         /**< Max chars allowed in memory buffer */
+  sli_ushort buffer_size;       /**< Size of memory buffer in bytes */
+  sli_ushort max_chars;         /**< Max chars allowed in memory buffer */
   sli_char *buffer;            /**< Start of memory buffer */
   sli_char *end_ptr;           /**< End of the line (points to '\0') */
   sli_char *cursor_ptr;        /**< Horizontal cursor position */
   sli_char *scroll_ptr;        /**< Horizontal scroll pointer */
-  int16_t fit_len;            /**< Max chars that fit in a line */
-  int16_t columns;            /**< The number of columns in the console */
-  int16_t cursor_margin;      /**< Cursor margin before scroll performed */
+  sli_sshort fit_len;            /**< Max chars that fit in a line */
+  sli_sshort columns;            /**< The number of columns in the console */
+  sli_sshort cursor_margin;      /**< Cursor margin before scroll performed */
 } LineInfo;
 
 /** Single line input state */

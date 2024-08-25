@@ -6,7 +6,6 @@
 #define SLINPUT_HEADER_INCLUDED
 
 #include <stddef.h>
-#include <stdint.h>
 
 #include "slinput_config.h"
 
@@ -229,7 +228,7 @@ typedef int SLINPUT_Flush(
 typedef int SLINPUT_GetTerminalWidth(
   const SLINPUT_State *state,
   SLINPUT_Stream stream_in,
-  uint16_t *width);
+  sli_ushort *width);
 
 /**
  * Callback to request completion information.
@@ -243,7 +242,7 @@ typedef int SLINPUT_GetTerminalWidth(
 typedef int SLINPUT_CompletionRequest(
   SLINPUT_State *state,
   SLINPUT_CompletionInfo completion_info,
-  uint16_t string_length, const sli_char *string);
+  sli_ushort string_length, const sli_char *string);
 
 /***************************************************************************/
 /* Setting callback pointers ***********************************************/
@@ -357,7 +356,7 @@ void SLINPUT_Set_CompletionRequest(
  */
 void SLINPUT_Set_NumColumns(
   SLINPUT_State *state,
-  uint16_t num_columns);
+  sli_ushort num_columns);
 
 /**
  * Sets the cursor margin width in columns. When the cursor crosses this margin
@@ -367,7 +366,7 @@ void SLINPUT_Set_NumColumns(
  */
 void SLINPUT_Set_CursorMargin(
   SLINPUT_State *state,
-  uint16_t cursor_margin);
+  sli_ushort cursor_margin);
 
 /**
  * Sets the character printed when left scroll is available.
@@ -444,7 +443,7 @@ int SLINPUT_Get(
   SLINPUT_State *state,
   const sli_char *prompt,
   const sli_char *initial,
-  uint16_t buffer_chars,
+  sli_ushort buffer_chars,
   sli_char *buffer);
 
 /**

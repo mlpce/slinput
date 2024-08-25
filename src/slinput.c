@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stddef.h>
-#include <stdint.h>
 #include <assert.h>
 
 #include "include/slinput.h"
@@ -101,7 +100,7 @@ static int OutputChars(SLINPUT_State *state, const sli_char *str) {
 
 /* Copies characters until a nil or the max_chars count is reached. Returns
 pointer to the destination terminating nil character. */
-static sli_char *CopyChars(uint16_t max_chars, const sli_char *str,
+static sli_char *CopyChars(sli_ushort max_chars, const sli_char *str,
     sli_char *dst_ptr) {
   while (max_chars-- > 0 && *str)
     *dst_ptr++ = *str++;
@@ -246,7 +245,7 @@ static int LineTab(SLINPUT_State *state) {
   int result = 0;
   if (term_info->completion_request != NULL) {
     result = term_info->completion_request(state, term_info->completion_info,
-      (uint16_t) (line_info->end_ptr - line_info->buffer), line_info->buffer);
+      (sli_ushort) (line_info->end_ptr - line_info->buffer), line_info->buffer);
   }
   return result;
 }
@@ -506,10 +505,10 @@ static size_t StringLength(const sli_char *str) {
 static int ApplyDimension(SLINPUT_State *state, const sli_char *prompt) {
   const TermInfo *term_info = &state->term_info;
   LineInfo *line_info = &state->line_info;
-  uint16_t columns = term_info->columns_in;
+  sli_ushort columns = term_info->columns_in;
   int result = 0;
   size_t prompt_length;
-  uint16_t cursor_margin;
+  sli_ushort cursor_margin;
 
   /* If columns_in is zero query the terminal width through the callback */
   if (!columns) {
@@ -562,7 +561,7 @@ static int ApplyDimension(SLINPUT_State *state, const sli_char *prompt) {
   prompt accordingly. */
 
   /* Set the active cursor margin. */
-  line_info->cursor_margin = (int16_t) cursor_margin;
+  line_info->cursor_margin = (sli_sshort) cursor_margin;
 
   /* Set the active prompt. */
   if (prompt_length)
@@ -571,7 +570,7 @@ static int ApplyDimension(SLINPUT_State *state, const sli_char *prompt) {
     line_info->prompt = L"";
 
   /* The number of columns of input text that fit into the line */
-  line_info->fit_len = (int16_t) (columns - prompt_length);
+  line_info->fit_len = (sli_sshort) (columns - prompt_length);
 
   /* If there's been no change in available columns, then don't need to
   redraw anything or change the scroll_ptr. */
@@ -580,7 +579,7 @@ static int ApplyDimension(SLINPUT_State *state, const sli_char *prompt) {
  
   /* Dimensions have changed. Keep the current cursor pointer and adjust the
   scroll ptr so the cursor remains on screen. */
-  line_info->columns = (int16_t) columns;
+  line_info->columns = (sli_sshort) columns;
 
   line_info->scroll_ptr = line_info->cursor_ptr - line_info->fit_len;
   if (line_info->scroll_ptr < line_info->buffer)
@@ -617,8 +616,8 @@ static int FlushInput(SLINPUT_State *state) {
 /* Processes input until enter is pressed or end of transmission */
 static int ProcessInput(SLINPUT_State *state, const sli_char *prompt) {
   const TermInfo *term_info = &state->term_info;
-  const int16_t max_history_index = term_info->num_history - 1;
-  int16_t history_index = -1;
+  const sli_sshort max_history_index = term_info->num_history - 1;
+  sli_sshort history_index = -1;
   int result;
 
   /* Disable line wrap */
@@ -739,7 +738,7 @@ static int ProcessInput(SLINPUT_State *state, const sli_char *prompt) {
 /* Gets a single line input. The terminal is placed into raw mode and the input
 loop executed. On completion the previous terminal mode is restored. */
 int SLINPUT_Get(SLINPUT_State *state, const sli_char *prompt,
-    const sli_char *initial, uint16_t buffer_chars, sli_char *buffer) {
+    const sli_char *initial, sli_ushort buffer_chars, sli_char *buffer) {
   const TermInfo *term_info;
   LineInfo *line_info;
   int result;
@@ -844,7 +843,7 @@ int SLINPUT_Save(SLINPUT_State *state, const sli_char *line) {
 
   /* If history is full, then delete the oldest */
   if (term_info->num_history == SLINPUT_MAX_HISTORY) {
-    uint16_t index;
+    sli_ushort index;
     term_info->free_in(term_info->alloc_info, term_info->history[0]);
     for (index = 1; index < SLINPUT_MAX_HISTORY; ++index)
       term_info->history[index - 1] = term_info->history[index];
@@ -922,13 +921,13 @@ void SLINPUT_Set_GetTerminalWidth(SLINPUT_State *state,
 
 /* Set number of columns */
 void SLINPUT_Set_NumColumns(SLINPUT_State *state,
-    uint16_t num_columns) {
+    sli_ushort num_columns) {
   state->term_info.columns_in = num_columns;
 }
 
 /* Set cursor margin */
 void SLINPUT_Set_CursorMargin(SLINPUT_State *state,
-    uint16_t cursor_margin) {
+    sli_ushort cursor_margin) {
   state->term_info.cursor_margin_in = cursor_margin;
 }
 
@@ -1009,7 +1008,7 @@ SLINPUT_State *SLINPUT_CreateState(
 /* Destroys the state */
 void SLINPUT_DestroyState(SLINPUT_State *state) {
   TermInfo *term_info;
-  uint16_t index;
+  sli_ushort index;
 
   if (!state)
     return;

@@ -6,7 +6,7 @@
 
 static int completion_request(SLINPUT_State *state,
     SLINPUT_CompletionInfo completion_info,
-    uint16_t string_length,
+    sli_ushort string_length,
     const sli_char *string) {
   if (string_length == 1 && string[0] == L'u') {
     SLINPUT_CompletionReplace(state, L"up");

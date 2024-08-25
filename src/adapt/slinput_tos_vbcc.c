@@ -6,18 +6,6 @@
 #include "include/slinput.h"
 #include "src/slinputi.h"
 
-static long os_Cnecin(void) {
-  return Cnecin();
-}
-
-static int16_t os_Cconis(void) {
-  return Cconis();
-}
-
-static long os_Kbshift(int16_t param) {
-  return Kbshift(param);
-}
-
 int SLINPUT_EnterRaw_Default(
     const SLINPUT_State *state,
     SLINPUT_Stream stream_in,
@@ -34,17 +22,17 @@ int SLINPUT_LeaveRaw_Default(const SLINPUT_State *state,
 
 int SLINPUT_GetCharIn_Default(const SLINPUT_State *state,
     SLINPUT_Stream stream_in, SLINPUT_KeyCode *key_code, sli_char *character) {
-  const long cin = os_Cnecin();
+  const long cin = Cnecin();
 
-  const long kbshift_state = os_Kbshift(-1);
+  const long kbshift_state = Kbshift(-1);
 
   const int control = !!(kbshift_state & 0x4);
   const int left_shift = !!(kbshift_state & 0x1);
   const int right_shift = !!(kbshift_state & 0x2);
   const int shifted = left_shift | right_shift;
 
-  const uint8_t kcv = cin >> 16;
-  const uint8_t chv = cin & 0xff;
+  const unsigned char kcv = cin >> 16;
+  const unsigned char chv = cin & 0xff;
 
   SLINPUT_KeyCode kc_enum_value = SLINPUT_KC_NUL;
 
@@ -95,7 +83,7 @@ int SLINPUT_GetCharIn_Default(const SLINPUT_State *state,
 
 int SLINPUT_IsCharAvailable_Default(const SLINPUT_State *state,
     SLINPUT_Stream stream_in) {
-  return !!os_Cconis();
+  return !!Cconis();
 }
 
 int SLINPUT_IsSpace_Default(const SLINPUT_State *state,
@@ -129,21 +117,21 @@ static __regsused("d0/d1/a0/a1") LONG LineAParameterBlock(VOID) =
   "\tmove.l\t(sp)+,d2\n";
 
 int SLINPUT_GetTerminalWidth_Default(const SLINPUT_State *state,
-    SLINPUT_Stream stream_in, uint16_t *width) {
+    SLINPUT_Stream stream_in, sli_ushort *width) {
   const char *env_columns = getenv("SLINPUT_COLUMNS");
   *width = 0;
   if (env_columns) {
     int env_columns_number = atoi(env_columns);
     if (env_columns_number >= SLINPUT_MIN_COLUMNS &&
         env_columns_number <= SLINPUT_MAX_COLUMNS) {
-      *width = (uint16_t) env_columns_number;
+      *width = (sli_ushort) env_columns_number;
     }
   }
 
   if (!*width ) {
     /* Use negative line-a variable */
-    const uint8_t *pb = (const uint8_t *) LineAParameterBlock();
-    *width = *(const uint16_t *)(pb-0x2c) + 1;
+    const unsigned char *pb = (const unsigned char *) LineAParameterBlock();
+    *width = *(const unsigned short *)(pb-0x2c) + 1;
   }
 
   return 0;
