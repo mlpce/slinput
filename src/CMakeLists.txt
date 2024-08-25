@@ -14,13 +14,13 @@ endif()
 check_type_size("wchar_t" SIZEOF_WCHAR_T LANGUAGE C)
 
 # Write out the config header.
-file(WRITE ${CMAKE_BINARY_DIR}/slinput_config.h
+file(WRITE ${CMAKE_BINARY_DIR}/slinputc.h
 "#ifndef SLINPUT_CONFIG
 #define SLINPUT_CONFIG
+#define SLICHAR_SIZE ${SIZEOF_WCHAR_T}
 typedef wchar_t sli_char;
 typedef signed short sli_sshort;
 typedef unsigned short sli_ushort;
-#define SLICHAR_SIZE ${SIZEOF_WCHAR_T}
 #endif
 "
 )
@@ -36,8 +36,8 @@ add_library(slinput STATIC
 )
 
 # Install the headers
-# slinput.h header is installed along with slinput_config.h
-set(SLINPUT_PUBLIC_HEADERS "${CMAKE_SOURCE_DIR}/include/slinput.h" "${CMAKE_BINARY_DIR}/slinput_config.h")
+# slinput.h header is installed along with slinputc.h
+set(SLINPUT_PUBLIC_HEADERS "${CMAKE_SOURCE_DIR}/include/slinput.h" "${CMAKE_BINARY_DIR}/slinputc.h")
 set_target_properties(slinput PROPERTIES PUBLIC_HEADER "${SLINPUT_PUBLIC_HEADERS}")
 
 # Install the slinput library
