@@ -33,7 +33,7 @@ int SLINPUT_LeaveRaw_Default(const SLINPUT_State *state,
 }
 
 int SLINPUT_GetCharIn_Default(const SLINPUT_State *state,
-    SLINPUT_Stream stream_in, SLINPUT_KeyCode *key_code, SLICHAR *character) {
+    SLINPUT_Stream stream_in, SLINPUT_KeyCode *key_code, sli_char *character) {
   const long cin = os_Cnecin();
 
   const long kbshift_state = os_Kbshift(-1);
@@ -99,7 +99,7 @@ int SLINPUT_IsCharAvailable_Default(const SLINPUT_State *state,
 }
 
 int SLINPUT_IsSpace_Default(const SLINPUT_State *state,
-    SLINPUT_Stream stream_in, SLICHAR character) {
+    SLINPUT_Stream stream_in, sli_char character) {
   return isspace(character);
 }
 
@@ -112,7 +112,7 @@ void SLINPUT_Free_Default(SLINPUT_AllocInfo alloc_info, void *ptr) {
 }
 
 int SLINPUT_Putchar_Default(const SLINPUT_State *state,
-    SLINPUT_Stream stream_out, SLICHAR c) {
+    SLINPUT_Stream stream_out, sli_char c) {
   return fputc(c, (FILE *) stream_out.stream_data) != EOF ? 0 : -1;
 }
 

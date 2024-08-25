@@ -7,7 +7,7 @@
 static int completion_request(SLINPUT_State *state,
     SLINPUT_CompletionInfo completion_info,
     uint16_t string_length,
-    const SLICHAR *string) {
+    const sli_char *string) {
   if (string_length == 1 && string[0] == L'u') {
     SLINPUT_CompletionReplace(state, L"up");
   } else if (string_length == 1 && string[0] == L'd') {
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
   SLINPUT_CompletionInfo completion_info = { NULL };
   int result = 1;
   SLINPUT_State *state;
-  SLICHAR buffer[256];
+  sli_char buffer[256];
 
   if (setlocale(LC_CTYPE, "") == NULL)
     return EXIT_FAILURE;

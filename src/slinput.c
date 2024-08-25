@@ -26,8 +26,8 @@ static int Minimum(int value1, int value2) {
 
 /* Finds the start of a word by searching leftwards, using spaces as the
 delimeter. */
-static SLICHAR *FindStartOfWord(SLINPUT_State *state,
-    const SLICHAR *buffer, SLICHAR *cursor_ptr) {
+static sli_char *FindStartOfWord(SLINPUT_State *state,
+    const sli_char *buffer, sli_char *cursor_ptr) {
   const TermInfo *term_info = &state->term_info;
   while (cursor_ptr > buffer) {
     if (!term_info->is_space_in(state, term_info->stream_in, *cursor_ptr) &&
@@ -41,8 +41,8 @@ static SLICHAR *FindStartOfWord(SLINPUT_State *state,
 }
 
 /* Skips spaces leftwards */
-static SLICHAR *SkipSpacesLeft(SLINPUT_State *state,
-    const SLICHAR *buffer, SLICHAR *cursor_ptr) {
+static sli_char *SkipSpacesLeft(SLINPUT_State *state,
+    const sli_char *buffer, sli_char *cursor_ptr) {
   const TermInfo *term_info = &state->term_info;
   while (cursor_ptr > buffer) {
     if (!term_info->is_space_in(state, term_info->stream_in, *cursor_ptr))
@@ -53,8 +53,8 @@ static SLICHAR *SkipSpacesLeft(SLINPUT_State *state,
 }
 
 /* Skips rightwards until a space is found */
-static SLICHAR *SkipWordRight(SLINPUT_State *state,
-    const SLICHAR *end_ptr, SLICHAR *cursor_ptr) {
+static sli_char *SkipWordRight(SLINPUT_State *state,
+    const sli_char *end_ptr, sli_char *cursor_ptr) {
   const TermInfo *term_info = &state->term_info;
   while (cursor_ptr < end_ptr) {
     if (term_info->is_space_in(state, term_info->stream_in, *cursor_ptr))
@@ -65,8 +65,8 @@ static SLICHAR *SkipWordRight(SLINPUT_State *state,
 }
 
 /* Skips spaces rightwards */
-static SLICHAR *SkipSpacesRight(SLINPUT_State *state,
-    const SLICHAR *end_ptr, SLICHAR *cursor_ptr) {
+static sli_char *SkipSpacesRight(SLINPUT_State *state,
+    const sli_char *end_ptr, sli_char *cursor_ptr) {
   const TermInfo *term_info = &state->term_info;
   while (cursor_ptr < end_ptr) {
     if (!term_info->is_space_in(state, term_info->stream_in, *cursor_ptr))
@@ -78,7 +78,7 @@ static SLICHAR *SkipSpacesRight(SLINPUT_State *state,
 
 /* Outputs characters until a nil or the max_chars count is reached */
 static int OutputMaxChars(SLINPUT_State *state,
-    ptrdiff_t max_chars, const SLICHAR *str) {
+    ptrdiff_t max_chars, const sli_char *str) {
   SLINPUT_Stream stream = state->term_info.stream_out;
   SLINPUT_Putchar *putchar_out = state->term_info.putchar_out;
   int result = 0;
@@ -89,7 +89,7 @@ static int OutputMaxChars(SLINPUT_State *state,
 }
 
 /* Outputs characters until a nil is reached */
-static int OutputChars(SLINPUT_State *state, const SLICHAR *str) {
+static int OutputChars(SLINPUT_State *state, const sli_char *str) {
   SLINPUT_Stream stream = state->term_info.stream_out;
   SLINPUT_Putchar *putchar_out = state->term_info.putchar_out;
   int result = 0;
@@ -101,8 +101,8 @@ static int OutputChars(SLINPUT_State *state, const SLICHAR *str) {
 
 /* Copies characters until a nil or the max_chars count is reached. Returns
 pointer to the destination terminating nil character. */
-static SLICHAR *CopyChars(uint16_t max_chars, const SLICHAR *str,
-    SLICHAR *dst_ptr) {
+static sli_char *CopyChars(uint16_t max_chars, const sli_char *str,
+    sli_char *dst_ptr) {
   while (max_chars-- > 0 && *str)
     *dst_ptr++ = *str++;
   *dst_ptr = L'\0';
@@ -215,7 +215,7 @@ static int LineBackspace(SLINPUT_State *state) {
 
   int result = 0;
   if (line_info->cursor_ptr > line_info->buffer)  {
-    SLICHAR *ptr;
+    sli_char *ptr;
     for (ptr = --line_info->cursor_ptr; ptr < line_info->end_ptr;
         ++ptr) {
       *ptr = *(ptr+1);
@@ -275,7 +275,7 @@ static int LineDelete(SLINPUT_State *state) {
   LineInfo *line_info = &state->line_info;
   int result = 0;
   if (line_info->cursor_ptr < line_info->end_ptr) {
-    SLICHAR *ptr;
+    sli_char *ptr;
     for (ptr = line_info->cursor_ptr; ptr < line_info->end_ptr; ++ptr)
       *ptr = *(ptr+1);
     --line_info->end_ptr;
@@ -287,7 +287,7 @@ static int LineDelete(SLINPUT_State *state) {
 
 /* Replaces the line with another string. Line is scrolled to display the end
 of the string. */
-static int LineReplace(SLINPUT_State *state, const SLICHAR *str, int redraw) {
+static int LineReplace(SLINPUT_State *state, const sli_char *str, int redraw) {
   LineInfo *line_info = &state->line_info;
   line_info->end_ptr = CopyChars(line_info->max_chars, str,
     line_info->buffer);
@@ -304,9 +304,9 @@ leftwards to first letter of word. */
 static int LineKeyLeft(SLINPUT_State *state, int cursor_warp_enabled) {
   const TermInfo *term_info = &state->term_info;
   LineInfo *line_info = &state->line_info;
-  const SLICHAR *orig_cursor_ptr = line_info->cursor_ptr;
+  const sli_char *orig_cursor_ptr = line_info->cursor_ptr;
   int result = 0;
-  SLICHAR *original_scroll_ptr;
+  sli_char *original_scroll_ptr;
   ptrdiff_t left_delta;
 
   if (!cursor_warp_enabled ||
@@ -361,9 +361,9 @@ rightwards until first letter of word. */
 static int LineKeyRight(SLINPUT_State *state, int cursor_warp_enabled) {
   const TermInfo *term_info = &state->term_info;
   LineInfo *line_info = &state->line_info;
-  const SLICHAR *orig_cursor_ptr = line_info->cursor_ptr;
+  const sli_char *orig_cursor_ptr = line_info->cursor_ptr;
   int result = 0;
-  SLICHAR *original_scroll_ptr;
+  sli_char *original_scroll_ptr;
   ptrdiff_t right_delta;
 
   if (!cursor_warp_enabled ||
@@ -435,14 +435,14 @@ static int LineEnd(SLINPUT_State *state) {
 }
 
 /* Input a character and move the cursor to the right */
-static int LineCharIn(SLINPUT_State *state, SLICHAR char_in) {
+static int LineCharIn(SLINPUT_State *state, sli_char char_in) {
   const TermInfo *term_info = &state->term_info;
   LineInfo *line_info = &state->line_info;
 
   int result = 0;
   if (line_info->end_ptr - line_info->buffer < line_info->max_chars) {
     ptrdiff_t working_margin;
-    SLICHAR *ptr;
+    sli_char *ptr;
     for (ptr = line_info->end_ptr; ptr > line_info->cursor_ptr; --ptr)
       *ptr = *(ptr-1);
     *line_info->cursor_ptr++ = char_in;
@@ -494,8 +494,8 @@ static int LineCharIn(SLINPUT_State *state, SLICHAR char_in) {
 }
 
 /* Determine the length of the string in characters */
-static size_t StringLength(const SLICHAR *str) {
-  const SLICHAR *ptr = str;
+static size_t StringLength(const sli_char *str) {
+  const sli_char *ptr = str;
   while (*ptr)
     ++ptr;
 
@@ -503,7 +503,7 @@ static size_t StringLength(const SLICHAR *str) {
 }
 
 /* Applies dimension constraints derived from available columns */
-static int ApplyDimension(SLINPUT_State *state, const SLICHAR *prompt) {
+static int ApplyDimension(SLINPUT_State *state, const sli_char *prompt) {
   const TermInfo *term_info = &state->term_info;
   LineInfo *line_info = &state->line_info;
   uint16_t columns = term_info->columns_in;
@@ -615,7 +615,7 @@ static int FlushInput(SLINPUT_State *state) {
 }
 
 /* Processes input until enter is pressed or end of transmission */
-static int ProcessInput(SLINPUT_State *state, const SLICHAR *prompt) {
+static int ProcessInput(SLINPUT_State *state, const sli_char *prompt) {
   const TermInfo *term_info = &state->term_info;
   const int16_t max_history_index = term_info->num_history - 1;
   int16_t history_index = -1;
@@ -632,7 +632,7 @@ static int ProcessInput(SLINPUT_State *state, const SLICHAR *prompt) {
 
   while (result >= 0) {
     SLINPUT_KeyCode key_code = SLINPUT_KC_NUL;
-    SLICHAR char_in = 0;
+    sli_char char_in = 0;
     CheckState(state);
 
     result = term_info->flush_out(state, term_info->stream_out);
@@ -738,8 +738,8 @@ static int ProcessInput(SLINPUT_State *state, const SLICHAR *prompt) {
 
 /* Gets a single line input. The terminal is placed into raw mode and the input
 loop executed. On completion the previous terminal mode is restored. */
-int SLINPUT_Get(SLINPUT_State *state, const SLICHAR *prompt,
-    const SLICHAR *initial, uint16_t buffer_chars, SLICHAR *buffer) {
+int SLINPUT_Get(SLINPUT_State *state, const sli_char *prompt,
+    const sli_char *initial, uint16_t buffer_chars, sli_char *buffer) {
   const TermInfo *term_info;
   LineInfo *line_info;
   int result;
@@ -791,7 +791,7 @@ int SLINPUT_Get(SLINPUT_State *state, const SLICHAR *prompt,
 }
 
 /* Returns non-zero if both strings are identical */
-static int StringIsSame(const SLICHAR *string1, const SLICHAR *string2) {
+static int StringIsSame(const sli_char *string1, const sli_char *string2) {
   while (*string1 && *string2 && *string1 == *string2) {
     ++string1;
     ++string2;
@@ -803,15 +803,15 @@ static int StringIsSame(const SLICHAR *string1, const SLICHAR *string2) {
 /* Saves a single line into history. '\r' and '\n' characters are removed. Up
 to SLINPUT_MAX_HISTORY lines can be stored, with the oldest line being removed
 when the limit is reached. */
-int SLINPUT_Save(SLINPUT_State *state, const SLICHAR *line) {
+int SLINPUT_Save(SLINPUT_State *state, const sli_char *line) {
   /* Work out how long the line is with newlines removed */
   TermInfo *term_info = &state->term_info;
   const size_t line_length = StringLength(line);
-  const SLICHAR *line_end = line + line_length;
+  const sli_char *line_end = line + line_length;
   size_t reduced_line_length = 0;
-  const SLICHAR *ptr;
-  SLICHAR *save_line;
-  SLICHAR *dest_ptr;
+  const sli_char *ptr;
+  sli_char *save_line;
+  sli_char *dest_ptr;
   for (ptr = line; ptr < line_end; ++ptr) {
     if (*ptr != L'\r' && *ptr != L'\n')
       ++reduced_line_length;
@@ -822,7 +822,7 @@ int SLINPUT_Save(SLINPUT_State *state, const SLICHAR *line) {
 
   /* Allocate and copy the line with newlines removed */
   save_line = term_info->malloc_in(term_info->alloc_info,
-    sizeof(SLICHAR)*(reduced_line_length + 1));
+    sizeof(sli_char)*(reduced_line_length + 1));
   if (!save_line) {
     /* Out of memory */
     return -1;
@@ -935,14 +935,14 @@ void SLINPUT_Set_CursorMargin(SLINPUT_State *state,
 /* Set left continuation character */
 void SLINPUT_Set_ContinuationCharacterLeft(
     SLINPUT_State *state,
-    SLICHAR continuation_character_left) {
+    sli_char continuation_character_left) {
   state->term_info.continuation_character_left = continuation_character_left;
 }
 
 /* Set right continuation character */
 void SLINPUT_Set_ContinuationCharacterRight(
     SLINPUT_State *state,
-    SLICHAR continuation_character_right) {
+    sli_char continuation_character_right) {
   state->term_info.continuation_character_right = continuation_character_right;
 }
 
@@ -1026,6 +1026,6 @@ void SLINPUT_DestroyState(SLINPUT_State *state) {
 }
 
 /* Replaces the line during completion */
-int SLINPUT_CompletionReplace(SLINPUT_State *state, const SLICHAR *string) {
+int SLINPUT_CompletionReplace(SLINPUT_State *state, const sli_char *string) {
   return LineReplace(state, string, 1);
 }

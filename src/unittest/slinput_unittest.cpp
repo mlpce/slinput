@@ -63,7 +63,7 @@ class SingleLineInput : public ::testing::Test {
   /** Holds an input (key code or character) */
   struct KeyInput {
     SLINPUT_KeyCode key_code = SLINPUT_KC_NUL;  /**< Input key code */
-    SLICHAR character = L'\0';  /**< Input character */
+    sli_char character = L'\0';  /**< Input character */
   };
 
   /**
@@ -108,7 +108,7 @@ int SingleLineInput::LeaveRawIn(const SLINPUT_State *state,
 }
 
 int SingleLineInput::GetCharInIn(const SLINPUT_State *state,
-    SLINPUT_Stream stream_in, SLINPUT_KeyCode *key_code, SLICHAR *character) {
+    SLINPUT_Stream stream_in, SLINPUT_KeyCode *key_code, sli_char *character) {
   SingleLineInput *self =
     static_cast<SingleLineInput *>(stream_in.stream_data);
 
@@ -143,7 +143,7 @@ int SingleLineInput::IsCharAvailableIn(const SLINPUT_State *state,
 }
 
 int SingleLineInput::IsSpaceIn(const SLINPUT_State *state,
-    SLINPUT_Stream stream_in, SLICHAR character) {
+    SLINPUT_Stream stream_in, sli_char character) {
   return iswspace(character);
 }
 
@@ -191,10 +191,10 @@ int SingleLineInput::CursorControlOut(const SLINPUT_State *state,
 }
 
 int SingleLineInput::PutCharOut(const SLINPUT_State *state,
-    SLINPUT_Stream stream_out, SLICHAR c) {
+    SLINPUT_Stream stream_out, sli_char c) {
   SingleLineInput *self =
     static_cast<SingleLineInput *>(stream_out.stream_data);
-  self->output_.push_back(static_cast<SLICHAR>(c));
+  self->output_.push_back(static_cast<sli_char>(c));
   return 1;
 }
 
@@ -236,7 +236,7 @@ TEST_F(SingleLineInput, PrecheckGetInput) {
   EXPECT_TRUE(IsCharAvailableIn(nullptr, stream_in));
 
   SLINPUT_KeyCode key_code = SLINPUT_KC_NUL;
-  SLICHAR character = L'\0';
+  sli_char character = L'\0';
   GetCharInIn(nullptr, stream_in, &key_code, &character);
   EXPECT_EQ(key_code, SLINPUT_KC_HOME);
   EXPECT_EQ(character, L'a');
@@ -278,7 +278,7 @@ TEST_F(SingleLineInput, GetNewLine) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[256];
+  sli_char buffer[256];
   terminal_width_ = 20;
 
   /* A single new line */
@@ -311,11 +311,11 @@ TEST_F(SingleLineInput, GetSimpleLine) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[256];
+  sli_char buffer[256];
   terminal_width_ = 20;
 
   /* Characters followed by new line */
-  const SLICHAR *input = L"Simple\n";
+  const sli_char *input = L"Simple\n";
   while (*input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *input++ } );
 
@@ -354,11 +354,11 @@ TEST_F(SingleLineInput, GetSimpleLineGreekLetters) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[256];
+  sli_char buffer[256];
   terminal_width_ = 20;
 
   /* Characters followed by new line */
-  const SLICHAR *input = L"ΑαΒβΓγΔδ\n";
+  const sli_char *input = L"ΑαΒβΓγΔδ\n";
   while (*input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *input++ } );
 
@@ -399,11 +399,11 @@ TEST_F(SingleLineInput, CursorLeftInsert) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[256];
+  sli_char buffer[256];
   terminal_width_ = 40;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four";
+  const sli_char *first_input = L"One two three four";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -412,7 +412,7 @@ TEST_F(SingleLineInput, CursorLeftInsert) {
     input_.push_back( KeyInput { SLINPUT_KC_LEFT, L'\0' } );
 
   /* Insert text '3.5 ' */
-  const SLICHAR *second_input = L"3.5 \n";
+  const sli_char *second_input = L"3.5 \n";
   while (*second_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *second_input++ } );
 
@@ -472,11 +472,11 @@ TEST_F(SingleLineInput, HomeInsertEndInsert) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[256];
+  sli_char buffer[256];
   terminal_width_ = 40;
 
   /* Characters followed by new line */
-  const SLICHAR *first_input = L"one two three four";
+  const sli_char *first_input = L"one two three four";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -484,7 +484,7 @@ TEST_F(SingleLineInput, HomeInsertEndInsert) {
   input_.push_back( KeyInput { SLINPUT_KC_HOME, L'\0' } );
 
   /* Insert text 'Zero ' */
-  const SLICHAR *second_input = L"Zero ";
+  const sli_char *second_input = L"Zero ";
   while (*second_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *second_input++ } );
 
@@ -492,7 +492,7 @@ TEST_F(SingleLineInput, HomeInsertEndInsert) {
   input_.push_back( KeyInput { SLINPUT_KC_END, L'\0' } );
 
   /* Insert text ' five\n' */
-  const SLICHAR *third_input = L" five\n";
+  const sli_char *third_input = L" five\n";
   while (*third_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *third_input++ } );
 
@@ -558,11 +558,11 @@ TEST_F(SingleLineInput, HomeRightInsert) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[256];
+  sli_char buffer[256];
   terminal_width_ = 40;
 
   /* Characters followed by new line */
-  const SLICHAR *first_input = L"One two three four";
+  const sli_char *first_input = L"One two three four";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -574,7 +574,7 @@ TEST_F(SingleLineInput, HomeRightInsert) {
     input_.push_back( KeyInput { SLINPUT_KC_RIGHT, L'\0' } );
 
   /* Insert text '1.5 ' */
-  const SLICHAR *second_input = L"1.5 \n";
+  const sli_char *second_input = L"1.5 \n";
   while (*second_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *second_input++ } );
 
@@ -633,11 +633,11 @@ TEST_F(SingleLineInput, InsertLeftBackspace) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[256];
+  sli_char buffer[256];
   terminal_width_ = 40;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four";
+  const sli_char *first_input = L"One two three four";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -715,11 +715,11 @@ TEST_F(SingleLineInput, InsertLeftDelete) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[256];
+  sli_char buffer[256];
   terminal_width_ = 40;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four";
+  const sli_char *first_input = L"One two three four";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -788,7 +788,7 @@ TEST_F(SingleLineInput, InsertMoreCharactersThanBufferSize) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[20];
+  sli_char buffer[20];
   terminal_width_ = 40;
 
   /* Insert more characters than buffer size */
@@ -846,11 +846,11 @@ TEST_F(SingleLineInput, InsertLeftInsertMoreCharactersThanBufferSize) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[20];
+  sli_char buffer[20];
   terminal_width_ = 40;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four";
+  const sli_char *first_input = L"One two three four";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -915,11 +915,11 @@ TEST_F(SingleLineInput, InsertWarpLeftDeleteInsertWarpRightDeleteInsert) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[20];
+  sli_char buffer[20];
   terminal_width_ = 40;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four";
+  const sli_char *first_input = L"One two three four";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -1012,11 +1012,11 @@ TEST_F(SingleLineInput, WarpsStopAtLimits) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[20];
+  sli_char buffer[20];
   terminal_width_ = 40;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four";
+  const sli_char *first_input = L"One two three four";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -1103,11 +1103,11 @@ TEST_F(SingleLineInput, InsertToScrollZeroMarginThenHOME) {
   /* Testing with zero margin */
   SLINPUT_Set_CursorMargin(state, 0);
 
-  SLICHAR buffer[40];
+  sli_char buffer[40];
   terminal_width_ = 20;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four five six";
+  const sli_char *first_input = L"One two three four five six";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -1178,11 +1178,11 @@ TEST_F(SingleLineInput, InsertToScrollZeroMarginThenWarpAndEnd) {
   /* Testing with zero margin */
   SLINPUT_Set_CursorMargin(state, 0);
 
-  SLICHAR buffer[40];
+  sli_char buffer[40];
   terminal_width_ = 20;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four five six";
+  const sli_char *first_input = L"One two three four five six";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -1276,11 +1276,11 @@ TEST_F(SingleLineInput, InsertToScrollFiveMarginThenHOME) {
   /* Testing with five margin */
   SLINPUT_Set_CursorMargin(state, 5);
 
-  SLICHAR buffer[40];
+  sli_char buffer[40];
   terminal_width_ = 20;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four five six";
+  const sli_char *first_input = L"One two three four five six";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -1352,11 +1352,11 @@ TEST_F(SingleLineInput, InsertToScrollFiveMarginThenWarpAndEnd) {
   /* Testing with five margin */
   SLINPUT_Set_CursorMargin(state, 5);
 
-  SLICHAR buffer[40];
+  sli_char buffer[40];
   terminal_width_ = 20;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four five six";
+  const sli_char *first_input = L"One two three four five six";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -1457,11 +1457,11 @@ TEST_F(SingleLineInput, InsertToScrollFiveMarginThenWarpAndEndWithContinuationCh
   SLINPUT_Set_ContinuationCharacterLeft(state, L'\x2190');
   SLINPUT_Set_ContinuationCharacterRight(state, L'\x2192');
 
-  SLICHAR buffer[40];
+  sli_char buffer[40];
   terminal_width_ = 20;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four five six";
+  const sli_char *first_input = L"One two three four five six";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -1559,11 +1559,11 @@ TEST_F(SingleLineInput, BackspaceIntoLeftMarginWithScroll) {
   /* Testing with five margin */
   SLINPUT_Set_CursorMargin(state, 5);
 
-  SLICHAR buffer[40];
+  sli_char buffer[40];
   terminal_width_ = 20;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four five six";
+  const sli_char *first_input = L"One two three four five six";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -1655,11 +1655,11 @@ TEST_F(SingleLineInput, InsertionIntoRightMarginWithScroll) {
   /* Testing with five margin */
   SLINPUT_Set_CursorMargin(state, 5);
 
-  SLICHAR buffer[40];
+  sli_char buffer[40];
   terminal_width_ = 20;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four five six";
+  const sli_char *first_input = L"One two three four five six";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -1667,7 +1667,7 @@ TEST_F(SingleLineInput, InsertionIntoRightMarginWithScroll) {
   input_.push_back( KeyInput { SLINPUT_KC_WARP_LEFT, L'\0' } );
 
   /* Characters */
-  const SLICHAR *second_input = L"5.5 ";
+  const sli_char *second_input = L"5.5 ";
   while (*second_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *second_input++ } );
 
@@ -1742,11 +1742,11 @@ TEST_F(SingleLineInput, DeletionAndBackspaceAtMiddleWithScroll) {
   /* Testing with five margin */
   SLINPUT_Set_CursorMargin(state, 5);
 
-  SLICHAR buffer[40];
+  sli_char buffer[40];
   terminal_width_ = 20;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four five six";
+  const sli_char *first_input = L"One two three four five six";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -1765,7 +1765,7 @@ TEST_F(SingleLineInput, DeletionAndBackspaceAtMiddleWithScroll) {
     input_.push_back( KeyInput { SLINPUT_KC_BACKSPACE, L'\0' } );
 
   /* Characters */
-  const SLICHAR *second_input = L"2 3 ";
+  const sli_char *second_input = L"2 3 ";
   while (*second_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *second_input++ } );
 
@@ -1852,11 +1852,11 @@ TEST_F(SingleLineInput, EscapeClearsInputBuffer) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[40];
+  sli_char buffer[40];
   terminal_width_ = 20;
 
   /* Characters */
-  const SLICHAR *first_input = L"One two three four five six";
+  const sli_char *first_input = L"One two three four five six";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
@@ -1929,7 +1929,7 @@ TEST_F(SingleLineInput, History) {
   input_.push_back( KeyInput { SLINPUT_KC_UP, L'\0' } );
   input_.push_back( KeyInput { SLINPUT_KC_NUL, L'\n' } );
 
-  SLICHAR buffer[40];
+  sli_char buffer[40];
 
   EXPECT_EQ(SLINPUT_Get(state, L"> ", nullptr,
     sizeof(buffer)/sizeof(buffer[0]), buffer), 18);
@@ -1964,7 +1964,7 @@ TEST_F(SingleLineInput, HistorySelection) {
 
   /* Add some history */
   for (int32_t i = 0; i < 64; ++i) {
-    SLICHAR history_buffer[16];
+    sli_char history_buffer[16];
 
     swprintf(history_buffer, sizeof(history_buffer)/sizeof(history_buffer[0]),
       L"Entry: %d", i);
@@ -1972,7 +1972,7 @@ TEST_F(SingleLineInput, HistorySelection) {
     SLINPUT_Save(state, history_buffer);
   }
 
-  SLICHAR buffer[40];
+  sli_char buffer[40];
   terminal_width_ = 20;
 
   /* Select history 8 times up - go up ten and down two */
@@ -2023,7 +2023,7 @@ typedef struct CompletionData {
 
 static int CompletionRequest(SLINPUT_State *state,
     SLINPUT_CompletionInfo completion_info, uint16_t string_length,
-    const SLICHAR *string) {
+    const sli_char *string) {
   EXPECT_EQ(wcslen(string), string_length);
 
   CompletionData *completion_data =
@@ -2050,7 +2050,7 @@ TEST_F(SingleLineInput, TabCommandCompletion) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[40];
+  sli_char buffer[40];
   terminal_width_ = 20;
 
   CompletionData completion_data;
@@ -2060,14 +2060,14 @@ TEST_F(SingleLineInput, TabCommandCompletion) {
   SLINPUT_Set_LeaveRaw(state, LeaveRawIn);
 
   /* Characters */
-  const SLICHAR *first_input = L"One ";
+  const sli_char *first_input = L"One ";
   while (*first_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *first_input++ } );
 
   /* Trigger command completion */
   input_.push_back( KeyInput { SLINPUT_KC_TAB, L'\0' } );
 
-  const SLICHAR *second_input = L"Two ";
+  const sli_char *second_input = L"Two ";
   while (*second_input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *second_input++ } );
 
@@ -2119,11 +2119,11 @@ TEST_F(SingleLineInput, InitialString) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  SLICHAR buffer[256];
+  sli_char buffer[256];
   terminal_width_ = 20;
 
   /* Characters followed by new line */
-  const SLICHAR *input = L"String\n";
+  const sli_char *input = L"String\n";
   while (*input)
     input_.push_back( KeyInput { SLINPUT_KC_NUL, *input++ } );
 

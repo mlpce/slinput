@@ -144,11 +144,11 @@ int SLINPUT_GetCharIn_Default(
     const SLINPUT_State *state,
     SLINPUT_Stream stream_in,
     SLINPUT_KeyCode *key_code,
-    SLICHAR *character) {
+    sli_char *character) {
   LinuxInputStream *input = (LinuxInputStream *) stream_in.stream_data;
   int result = 0;
   SLINPUT_KeyCode key_code_input = SLINPUT_KC_NUL;
-  SLICHAR wchar_input = L'\0';
+  sli_char wchar_input = L'\0';
 
   if (key_code)
     *key_code = SLINPUT_KC_NUL;
@@ -302,7 +302,7 @@ int SLINPUT_IsCharAvailable_Default(
 int SLINPUT_IsSpace_Default(
     const SLINPUT_State *state,
     SLINPUT_Stream stream_in,
-    SLICHAR character) {
+    sli_char character) {
   return iswspace((wint_t) character);
 }
 
@@ -380,7 +380,7 @@ int SLINPUT_CursorControl_Default(
 int SLINPUT_Putchar_Default(
     const SLINPUT_State *state,
     SLINPUT_Stream stream_out,
-    SLICHAR c) {
+    sli_char c) {
   size_t num_mchars = 0;
   char *multibyte_buffer;
   wchar_t wide_string[2];

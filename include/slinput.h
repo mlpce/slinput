@@ -153,7 +153,7 @@ typedef int SLINPUT_GetCharIn(
   const SLINPUT_State *state,
   SLINPUT_Stream stream_in,
   SLINPUT_KeyCode *key_code,
-  SLICHAR *character);
+  sli_char *character);
 
 /**
  * Determines if a character is available on the input stream. This callback
@@ -179,7 +179,7 @@ typedef int SLINPUT_IsCharAvailable(
 typedef int SLINPUT_IsSpace(
   const SLINPUT_State *state,
   SLINPUT_Stream stream_in,
-  SLICHAR character);
+  sli_char character);
 
 /***************************************************************************/
 /* Output function types ***************************************************/
@@ -207,7 +207,7 @@ typedef int SLINPUT_CursorControl(
 typedef int SLINPUT_Putchar(
   const SLINPUT_State *state,
   SLINPUT_Stream stream_out,
-  SLICHAR c);
+  sli_char c);
 
 /**
  * Flushes the output stream.
@@ -243,7 +243,7 @@ typedef int SLINPUT_GetTerminalWidth(
 typedef int SLINPUT_CompletionRequest(
   SLINPUT_State *state,
   SLINPUT_CompletionInfo completion_info,
-  uint16_t string_length, const SLICHAR *string);
+  uint16_t string_length, const sli_char *string);
 
 /***************************************************************************/
 /* Setting callback pointers ***********************************************/
@@ -377,7 +377,7 @@ void SLINPUT_Set_CursorMargin(
  */
 void SLINPUT_Set_ContinuationCharacterLeft(
   SLINPUT_State *state,
-  SLICHAR continuation_character_left);
+  sli_char continuation_character_left);
 
 /**
  * Sets the character printed when right scroll is available.
@@ -387,7 +387,7 @@ void SLINPUT_Set_ContinuationCharacterLeft(
  */
 void SLINPUT_Set_ContinuationCharacterRight(
   SLINPUT_State *state,
-  SLICHAR continuation_character_right);
+  sli_char continuation_character_right);
 
 /**
  * Sets the input and output streams.
@@ -442,10 +442,10 @@ void SLINPUT_DestroyState(
  */
 int SLINPUT_Get(
   SLINPUT_State *state,
-  const SLICHAR *prompt,
-  const SLICHAR *initial,
+  const sli_char *prompt,
+  const sli_char *initial,
   uint16_t buffer_chars,
-  SLICHAR *buffer);
+  sli_char *buffer);
 
 /**
  * Saves a line of input into history. Carriage return and line feed characters
@@ -456,7 +456,7 @@ int SLINPUT_Get(
  */
 int SLINPUT_Save(
   SLINPUT_State *state,
-  const SLICHAR *line);
+  const sli_char *line);
 
 /**
  * Replaces the current input string with the completion string and redraws
@@ -467,6 +467,6 @@ int SLINPUT_Save(
  */
 int SLINPUT_CompletionReplace(
   SLINPUT_State *state,
-  const SLICHAR *string);
+  const sli_char *string);
 
 #endif

@@ -11,13 +11,13 @@ else()
 endif()
 
 # Check how big wchar_t is.
-check_type_size("wchar_t" SIZEOF_WCHAR_T)
+check_type_size("wchar_t" SIZEOF_WCHAR_T LANGUAGE C)
 
 # Write out the config header.
 file(WRITE ${CMAKE_BINARY_DIR}/slinput_config.h
 "#ifndef SLINPUT_CONFIG
 #define SLINPUT_CONFIG
-#define SLICHAR wchar_t
+typedef wchar_t slichar;
 #define SLICHAR_SIZE ${SIZEOF_WCHAR_T}
 #endif
 "
