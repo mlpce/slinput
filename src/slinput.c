@@ -5,6 +5,8 @@
 #include "include/slinput.h"
 #include "src/slinputi.h"
 
+static const sli_char EmptyString[1] = { '\0' };
+
 /* Check pointers are within expected ranges */
 static void CheckState(SLINPUT_State *state) {
   assert(state->line_info.end_ptr >= state->line_info.buffer);
@@ -104,7 +106,7 @@ static sli_char *CopyChars(sli_ushort max_chars, const sli_char *str,
     sli_char *dst_ptr) {
   while (max_chars-- > 0 && *str)
     *dst_ptr++ = *str++;
-  *dst_ptr = L'\0';
+  *dst_ptr = '\0';
   return dst_ptr;
 }
 
@@ -112,11 +114,11 @@ static sli_char *CopyChars(sli_ushort max_chars, const sli_char *str,
 newline */
 static int LineEnter(SLINPUT_State *state) {
   SLINPUT_Stream stream = state->term_info.stream_out;
-  int result = (*state->term_info.putchar_out)(state, stream, L'\n');
+  int result = (*state->term_info.putchar_out)(state, stream, '\n');
   LineInfo *line_info = &state->line_info;
   if (line_info->end_ptr == line_info->buffer && line_info->max_chars) {
-    *line_info->end_ptr++ = L'\n';
-    *line_info->end_ptr = L'\0';
+    *line_info->end_ptr++ = '\n';
+    *line_info->end_ptr = '\0';
   }
   return result;
 }
@@ -140,7 +142,7 @@ static int RedrawLine(SLINPUT_State *state) {
   result = Minimum(result,
     term_info->putchar_out(state, term_info->stream_out,
     line_info->scroll_ptr != line_info->buffer ?
-    term_info->continuation_character_left : L' '));
+    term_info->continuation_character_left : ' '));
 
   result = Minimum(result,
     OutputMaxChars(state,
@@ -158,7 +160,7 @@ static int RedrawLine(SLINPUT_State *state) {
   result = Minimum(result,
     term_info->putchar_out(state, term_info->stream_out,
     line_info->scroll_ptr + line_info->fit_len < line_info->end_ptr ?
-    term_info->continuation_character_right : L' '));
+    term_info->continuation_character_right : ' '));
 
   result = Minimum(result,
     term_info->cursor_control_out(state, term_info->stream_out,
@@ -195,7 +197,7 @@ static int RedrawLineFromCursor(SLINPUT_State *state) {
   result = Minimum(result,
     term_info->putchar_out(state, term_info->stream_out,
     line_info->scroll_ptr + line_info->fit_len < line_info->end_ptr ?
-    term_info->continuation_character_right : L' '));
+    term_info->continuation_character_right : ' '));
 
   result = Minimum(result,
     term_info->cursor_control_out(state, term_info->stream_out,
@@ -256,7 +258,7 @@ static int LineEscape(SLINPUT_State *state) {
   line_info->end_ptr = line_info->buffer;
   line_info->cursor_ptr = line_info->buffer;
   line_info->scroll_ptr = line_info->buffer;
-  *line_info->end_ptr = L'\0';
+  *line_info->end_ptr = '\0';
 
   return RedrawLine(state);
 }
@@ -266,7 +268,7 @@ static int LineEndOfTransmission(SLINPUT_State *state) {
   LineEscape(state);
 
   return (*state->term_info.putchar_out)(state,
-    state->term_info.stream_out, L'\n');
+    state->term_info.stream_out, '\n');
 }
 
 /* Delete the current character, cursor does not move */
@@ -445,7 +447,7 @@ static int LineCharIn(SLINPUT_State *state, sli_char char_in) {
     for (ptr = line_info->end_ptr; ptr > line_info->cursor_ptr; --ptr)
       *ptr = *(ptr-1);
     *line_info->cursor_ptr++ = char_in;
-    *++line_info->end_ptr = L'\0';
+    *++line_info->end_ptr = '\0';
 
     working_margin = line_info->end_ptr - line_info->cursor_ptr;
     if (working_margin > line_info->cursor_margin)
@@ -477,7 +479,7 @@ static int LineCharIn(SLINPUT_State *state, sli_char char_in) {
       result = Minimum(result,
         term_info->putchar_out(state, term_info->stream_out,
           line_info->scroll_ptr + line_info->fit_len < line_info->end_ptr ?
-          term_info->continuation_character_right : L' '));
+          term_info->continuation_character_right : ' '));
 
       result = Minimum(result,
         term_info->cursor_control_out(state, term_info->stream_out,
@@ -502,7 +504,7 @@ static size_t StringLength(const sli_char *str) {
 }
 
 /* Applies dimension constraints derived from available columns */
-static int ApplyDimension(SLINPUT_State *state, const sli_char *prompt) {
+static int ApplyDimension(SLINPUT_State *state) {
   const TermInfo *term_info = &state->term_info;
   LineInfo *line_info = &state->line_info;
   sli_ushort columns = term_info->columns_in;
@@ -567,7 +569,7 @@ static int ApplyDimension(SLINPUT_State *state, const sli_char *prompt) {
   if (prompt_length)
     line_info->prompt = line_info->prompt_in;
   else
-    line_info->prompt = L"";
+    line_info->prompt = EmptyString;
 
   /* The number of columns of input text that fit into the line */
   line_info->fit_len = (sli_sshort) (columns - prompt_length);
@@ -614,7 +616,7 @@ static int FlushInput(SLINPUT_State *state) {
 }
 
 /* Processes input until enter is pressed or end of transmission */
-static int ProcessInput(SLINPUT_State *state, const sli_char *prompt) {
+static int ProcessInput(SLINPUT_State *state) {
   const TermInfo *term_info = &state->term_info;
   const sli_sshort max_history_index = term_info->num_history - 1;
   sli_sshort history_index = -1;
@@ -625,7 +627,7 @@ static int ProcessInput(SLINPUT_State *state, const sli_char *prompt) {
     SLINPUT_CCC_WRAP_OFF);
 
   /* Initial dimensions and line draw */
-  result = ApplyDimension(state, prompt);
+  result = ApplyDimension(state);
   if (result >= 0)
     result = RedrawLine(state);
 
@@ -643,7 +645,7 @@ static int ProcessInput(SLINPUT_State *state, const sli_char *prompt) {
     if (result < 0)
       break;
 
-    result = ApplyDimension(state, prompt);
+    result = ApplyDimension(state);
     if (result == 1) {
       /* Dimensions have changed so redraw the line */
       RedrawLine(state);
@@ -660,7 +662,7 @@ static int ProcessInput(SLINPUT_State *state, const sli_char *prompt) {
       /* Finish with an empty buffer */
       result = LineEndOfTransmission(state);
       break;
-    } else if (char_in == L'\r' || char_in == L'\n') {
+    } else if (char_in == '\r' || char_in == '\n') {
       /* Enter */
       result = LineEnter(state);
       break;
@@ -700,7 +702,7 @@ static int ProcessInput(SLINPUT_State *state, const sli_char *prompt) {
       }
 
       /* Update the buffer with the browsing result */
-      result = LineReplace(state, history_index < 0 ? L"" :
+      result = LineReplace(state, history_index < 0 ? EmptyString :
         term_info->history[history_index], 1);
     } else if (key_code == SLINPUT_KC_LEFT) {
       /* Key: left */
@@ -720,7 +722,7 @@ static int ProcessInput(SLINPUT_State *state, const sli_char *prompt) {
     } else if (key_code == SLINPUT_KC_END) {
       /* Key: End */
       result = LineEnd(state);
-    } else if (char_in != L'\0') {
+    } else if (char_in != '\0') {
       /* Key: any printable character */
       /* Purpose: input a character and move the cursor to the right */
       result = LineCharIn(state, char_in);
@@ -757,7 +759,7 @@ int SLINPUT_Get(SLINPUT_State *state, const sli_char *prompt,
   line_info->end_ptr = buffer;
   line_info->cursor_ptr = buffer;
   line_info->scroll_ptr = buffer;
-  *buffer = L'\0';
+  *buffer = '\0';
 
   if (initial) {
     /* Copy in the initial string, without a redraw */
@@ -774,7 +776,7 @@ int SLINPUT_Get(SLINPUT_State *state, const sli_char *prompt,
   result = FlushInput(state);
   if (result >= 0) {
     /* Process input */
-    result = ProcessInput(state, prompt);
+    result = ProcessInput(state);
   }
 
   /* Restore previous term info */
@@ -812,7 +814,7 @@ int SLINPUT_Save(SLINPUT_State *state, const sli_char *line) {
   sli_char *save_line;
   sli_char *dest_ptr;
   for (ptr = line; ptr < line_end; ++ptr) {
-    if (*ptr != L'\r' && *ptr != L'\n')
+    if (*ptr != '\r' && *ptr != '\n')
       ++reduced_line_length;
   }
 
@@ -829,10 +831,10 @@ int SLINPUT_Save(SLINPUT_State *state, const sli_char *line) {
 
   dest_ptr = save_line;
   for (ptr = line; ptr < line_end; ++ptr) {
-    if (*ptr != L'\r' && *ptr != L'\n')
+    if (*ptr != '\r' && *ptr != '\n')
       *dest_ptr++ = *ptr;
   }
-  save_line[reduced_line_length] = L'\0';
+  save_line[reduced_line_length] = '\0';
 
   /* Don't save the line if it is identical to the previous one */
   if (term_info->num_history && StringIsSame(save_line,
@@ -995,12 +997,13 @@ SLINPUT_State *SLINPUT_CreateState(
   SLINPUT_Set_Putchar(state, SLINPUT_Putchar_Default);
   SLINPUT_Set_Flush(state, SLINPUT_Flush_Default);
   SLINPUT_Set_GetTerminalWidth(state, SLINPUT_GetTerminalWidth_Default);
-  SLINPUT_Set_CompletionRequest(state, completion_info, NULL);
+  SLINPUT_Set_CompletionRequest(state, completion_info,
+    (SLINPUT_CompletionRequest *) NULL);
 
   SLINPUT_Set_NumColumns(state, 0);
   SLINPUT_Set_CursorMargin(state, 5);
-  SLINPUT_Set_ContinuationCharacterLeft(state, L'<');
-  SLINPUT_Set_ContinuationCharacterRight(state, L'>');
+  SLINPUT_Set_ContinuationCharacterLeft(state, '<');
+  SLINPUT_Set_ContinuationCharacterRight(state, '>');
 
   return state;
 }
