@@ -109,12 +109,14 @@ int SLINPUT_Flush_Default(const SLINPUT_State *state,
   return fflush((FILE *) stream_out.stream_data) == 0 ? 0 : -1;
 }
 
+#ifdef __VBCC__
 static __regsused("d0/d1/a0/a1") LONG LineAParameterBlock(VOID) =
   "\tmove.l\td2,-(sp)\n"
   "\tmove.l\ta2,-(sp)\n"
   "\tdc.w\t$A000\n"
   "\tmove.l\t(sp)+,a2\n"
   "\tmove.l\t(sp)+,d2\n";
+#endif
 
 int SLINPUT_GetTerminalWidth_Default(const SLINPUT_State *state,
     SLINPUT_Stream stream_in, sli_ushort *width) {
@@ -129,9 +131,14 @@ int SLINPUT_GetTerminalWidth_Default(const SLINPUT_State *state,
   }
 
   if (!*width ) {
+#ifdef __VBCC__
     /* Use negative line-a variable */
     const unsigned char *pb = (const unsigned char *) LineAParameterBlock();
     *width = *(const unsigned short *)(pb-0x2c) + 1;
+#else
+    /* TODO: Pure C */
+    *width = 40;
+#endif
   }
 
   return 0;

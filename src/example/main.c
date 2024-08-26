@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef __PUREC__
+#define L ""
+#else
 #include <locale.h>
+#endif
 
 #include "include/slinput.h"
 
@@ -8,9 +13,9 @@ static int completion_request(SLINPUT_State *state,
     SLINPUT_CompletionInfo completion_info,
     sli_ushort string_length,
     const sli_char *string) {
-  if (string_length == 1 && string[0] == L'u') {
+  if (string_length == 1 && string[0] == 'u') {
     SLINPUT_CompletionReplace(state, L"up");
-  } else if (string_length == 1 && string[0] == L'd') {
+  } else if (string_length == 1 && string[0] == 'd') {
     SLINPUT_CompletionReplace(state, L"down");
   } else {
     printf("\nNo completion options\n");
@@ -27,10 +32,13 @@ int main(int argc, char **argv) {
   SLINPUT_State *state;
   sli_char buffer[256];
 
+#ifndef __PUREC__
   if (setlocale(LC_CTYPE, "") == NULL)
     return EXIT_FAILURE;
+#endif
 
-  state = SLINPUT_CreateState(alloc_info, NULL, NULL);
+  state = SLINPUT_CreateState(alloc_info,
+    (SLINPUT_Malloc *) NULL, (SLINPUT_Free *) NULL);
   if (state == NULL)
     return EXIT_FAILURE;
 
