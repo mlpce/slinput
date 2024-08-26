@@ -3,11 +3,11 @@ include(CheckTypeSize)
 # Support for different OS
 if (ATARI_TOS_VBCC_ENABLED)
   # Atari TOS using vbcc compiler
-  set(ADAPT_SOURCES "adapt/slinput_tos_vbcc.c")
+  set(ADAPT_SOURCES "adapt/tos.c")
 else()
   # Otherwise, linux
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-parameter -pedantic -Wconversion")
-  set(ADAPT_SOURCES "adapt/slinput_linux.c")
+  set(ADAPT_SOURCES "adapt/linux.c")
 endif()
 
 # Check how big wchar_t is.

@@ -1,8 +1,8 @@
 if (ATARI_TOS_VBCC_ENABLED)
 # 8.3 TOS filenames 
-set(EXAMPLE_EXECUTABLE_NAME "slinput.tos")
+set(EXAMPLE_EXECUTABLE_NAME "slinputx.tos")
 else()
-set(EXAMPLE_EXECUTABLE_NAME "slinput_example")
+set(EXAMPLE_EXECUTABLE_NAME "slinputx")
 endif()
 
 add_executable(
