@@ -8,6 +8,7 @@ else()
   project(slinput VERSION 1.0 LANGUAGES C)
 endif()
 
+# Use C90 for compatibility with e.g. "Pure C"
 set(CMAKE_C_STANDARD 90)
 
 # slinput headers and source code directories

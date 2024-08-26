@@ -10,9 +10,9 @@ int SLINPUT_EnterRaw_Default(
     const SLINPUT_State *state,
     SLINPUT_Stream stream_in,
     SLINPUT_TermAttr *original_term_attr) {
-   SLINPUT_TermAttr term_attr = { NULL };
-   *original_term_attr = term_attr;
-   return 0;
+  SLINPUT_TermAttr term_attr = { NULL };
+  *original_term_attr = term_attr;
+  return 0;
 }
 
 int SLINPUT_LeaveRaw_Default(const SLINPUT_State *state,

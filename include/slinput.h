@@ -435,7 +435,7 @@ void SLINPUT_DestroyState(
  * @param[in] state the state pointer created by SLINPUT_CreateState.
  * @param[in] prompt the prompt to display
  * @param[in] initial the initial contents of the string buffer (can be NULL)
- * @param[in] buffer_chars the size of buffer in SLICHAR characters (not bytes)
+ * @param[in] buffer_chars the buffer size in sli_char characters (not bytes)
  * @param[in] buffer the buffer to store the input
  * @return negative value on error, 0 EOT, >= 1 indicates num chars in buffer
  */

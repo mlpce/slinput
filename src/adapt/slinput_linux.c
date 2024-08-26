@@ -93,18 +93,18 @@ typedef struct EscapeSequenceMapping {
 
 /* Input escape sequence mappings */
 static const EscapeSequenceMapping M_SequenceMapping[] = {
-  { "\033[C", SLINPUT_KC_RIGHT }, /* Cursor right */
-  { "\033[D", SLINPUT_KC_LEFT }, /* Cursor left */
-  { "\033[A", SLINPUT_KC_UP }, /* Cursor up */
-  { "\033[B", SLINPUT_KC_DOWN }, /* Cursor down */
-  { "\033[3~", SLINPUT_KC_DEL }, /* Delete */
-  { "\033[1;2D", SLINPUT_KC_WARP_LEFT }, /* With shift cursor warp left */
-  { "\033[1;2C", SLINPUT_KC_WARP_RIGHT }, /* With shift cursor warp right */
-  { "\033[1;5D", SLINPUT_KC_WARP_LEFT }, /* With control cursor warp left */
-  { "\033[1;5C", SLINPUT_KC_WARP_RIGHT }, /* With control cursor warp right */
-  { "\033[H", SLINPUT_KC_HOME }, /* Home cursor to start of line */
-  { "\033[F", SLINPUT_KC_END }, /* End cursor to end of line */
-  { NULL, SLINPUT_KC_NUL } /* End of mappings */
+  { "\033[C", SLINPUT_KC_RIGHT },  /* Cursor right */
+  { "\033[D", SLINPUT_KC_LEFT },  /* Cursor left */
+  { "\033[A", SLINPUT_KC_UP },  /* Cursor up */
+  { "\033[B", SLINPUT_KC_DOWN },  /* Cursor down */
+  { "\033[3~", SLINPUT_KC_DEL },  /* Delete */
+  { "\033[1;2D", SLINPUT_KC_WARP_LEFT },  /* With shift cursor warp left */
+  { "\033[1;2C", SLINPUT_KC_WARP_RIGHT },  /* With shift cursor warp right */
+  { "\033[1;5D", SLINPUT_KC_WARP_LEFT },  /* With control cursor warp left */
+  { "\033[1;5C", SLINPUT_KC_WARP_RIGHT },  /* With control cursor warp right */
+  { "\033[H", SLINPUT_KC_HOME },  /* Home cursor to start of line */
+  { "\033[F", SLINPUT_KC_END },  /* End cursor to end of line */
+  { NULL, SLINPUT_KC_NUL }  /* End of mappings */
 };
 
 /** Mapping of character to key code */

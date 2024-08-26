@@ -39,7 +39,7 @@ Again, there will be the **CMAKE_BUILD_TYPE** and **CMAKE_INSTALL_PREFIX** setti
 ### Compilation and Installation
 
 After the ccmake configuration step, make followed by make install will build and install the library and header files to the installation path indicated by **CMAKE_INSTALL_PREFIX**.
-The **libslinput.a** library will be installed along with two header files, **slinput.h** and **slinput_config.h**.
+The **libslinput.a** library will be installed along with two header files, **slinput.h** and **slinputc.h**.
 
 If unit tests are enabled, then an executable **slinput_unittest** will also be installed, along with some other google test headers and libraries.
 
@@ -51,18 +51,18 @@ Follow these steps to use the library, as shown in **src/example/main.c**:
 
 1) Include the header with **#include "include/slinput.h"**  
 2) Call **SLINPUT_CreateState**. This will create a state pointer. The function takes parameters for allocation callbacks, but these can be left at null to use defaults.  
-3) Call **SLINPUT_Get** in your input loop. The function takes a parameter for the prompt to display, a parameter for the initial string to place in the buffer (which can be null), and also a buffer in which to store the input text. **SLINPUT_Get** returns an int value. This will be >= 1 if text was input (actually the number of characters in the buffer), 0 if CTRL-D was pressed, or negative if an error occurred. The buffer_chars parameter is the size of the buffer in SLICHAR characters, not the buffer size in bytes.  
+3) Call **SLINPUT_Get** in your input loop. The function takes a parameter for the prompt to display, a parameter for the initial string to place in the buffer (which can be null), and also a buffer in which to store the input text. **SLINPUT_Get** returns an int value. This will be >= 1 if text was input (actually the number of characters in the buffer), 0 if CTRL-D was pressed, or negative if an error occurred. The buffer_chars parameter is the size of the buffer in **sli_char** characters, not the buffer size in bytes.  
 4) Optionally, save the input text into history using **SLINPUT_Save**. The next time **SLINPUT_Get** is called it will appear in history (select with cursor up or down and choose with enter).  
 5) When finished, call **SLINPUT_DestroyState**.
 
 ## A note on character types and slinput_config.h
 
-The character type used by slinput is a preprocessor define **SLICHAR**. This **#define** is contained in **slinput_config.h** which is generated at configure time by cmake - you will see it generated in the **build-atari-st** or **build-linux** directories. **SLICHAR** is defined as **wchar_t**. On the Atari ST with vbcc, **wchar_t** is one byte in size. On Linux it is four bytes.
+The character type used by slinput is a typedef **sli_char**. This typedef is contained in **slinputc.h** which is generated at configure time by cmake - you will see it generated in the **build-atari-st** or **build-linux** directories. **sli_char** is typedef'd as **wchar_t**. On the Atari ST with vbcc, **wchar_t** is one byte in size. On Linux it is four bytes.
 
-**slinput_config.h** also contains another define, **SLICHAR_SIZE**. This gives the size of **SLICHAR** in bytes as a preprocessor define, which can be useful in client code for conditional compilation (e.g. on the Atari ST which doesn't use multibyte characters).
+**slinputc.h** also contains a define, **SLI_CHAR_SIZE**. This gives the size of **sli_char** in bytes as a preprocessor define, which can be useful in client code for conditional compilation (e.g. on the Atari ST which doesn't use multibyte characters).
 
 The Linux adaptation uses **mbsrtowcs** and **wcsrtombs** to convert between multibyte and wide characters. It is important therefore to set the locale for **LC_CTYPE** appropriately.
 
 ## Issues
 
-Combining diacriticals don't render/work correctly.
+Combining diacriticals don't render/work correctly on Linux.

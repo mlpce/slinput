@@ -95,15 +95,15 @@ typedef struct TermInfo {
 typedef struct LineInfo {
   const sli_char *prompt_in;   /**< Original prompt */
   const sli_char *prompt;      /**< Prompt to render at start of line */
-  sli_ushort buffer_size;       /**< Size of memory buffer in bytes */
-  sli_ushort max_chars;         /**< Max chars allowed in memory buffer */
+  sli_ushort buffer_size;      /**< Size of memory buffer in bytes */
+  sli_ushort max_chars;        /**< Max chars allowed in memory buffer */
   sli_char *buffer;            /**< Start of memory buffer */
   sli_char *end_ptr;           /**< End of the line (points to '\0') */
   sli_char *cursor_ptr;        /**< Horizontal cursor position */
   sli_char *scroll_ptr;        /**< Horizontal scroll pointer */
-  sli_sshort fit_len;            /**< Max chars that fit in a line */
-  sli_sshort columns;            /**< The number of columns in the console */
-  sli_sshort cursor_margin;      /**< Cursor margin before scroll performed */
+  sli_sshort fit_len;          /**< Max chars that fit in a line */
+  sli_sshort columns;          /**< The number of columns in the console */
+  sli_sshort cursor_margin;    /**< Cursor margin before scroll performed */
 } LineInfo;
 
 /** Single line input state */
