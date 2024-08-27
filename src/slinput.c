@@ -962,6 +962,8 @@ SLINPUT_State *SLINPUT_CreateState(
   SLINPUT_State *state;
   TermInfo *term_info;
 
+  assert(sizeof(sli_char) == SLI_CHAR_SIZE);
+
   if (!malloc_cb)
     malloc_cb = SLINPUT_Malloc_Default;
   if (!free_cb)
