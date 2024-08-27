@@ -39,7 +39,7 @@ Again, there will be the **CMAKE_BUILD_TYPE** and **CMAKE_INSTALL_PREFIX** setti
 ### Compilation and Installation
 
 After the ccmake configuration step, make followed by make install will build and install the library and header files to the installation path indicated by **CMAKE_INSTALL_PREFIX**.
-The **libslinput.a** library will be installed along with two header files, the API header **slinput.h** and the configuration header **slinputc.h**.
+The **libslinput.a** library will be installed along with the API header **slinput.h**.
 
 If unit tests are enabled, then an executable **slinputt** will also be installed containing the unit tests, along with some other google test headers and libraries.
 
@@ -55,11 +55,11 @@ Follow these steps to use the library, as shown in **src/example/main.c**:
 4) Optionally, save the input text into history using **SLINPUT_Save**. The next time **SLINPUT_Get** is called it will appear in history (select with cursor up or down and choose with enter).  
 5) When finished, call **SLINPUT_DestroyState**.
 
-## A note on character types and slinputc.h
+## Character type and size
 
-The character type used by slinput is a typedef **sli_char**. This typedef is contained in **slinputc.h** which is generated at configure time by cmake - you will see it generated in the **build/tos** or **build/linux** directories. **sli_char** is typedef'd as **wchar_t**. On the Atari ST with vbcc, **wchar_t** is one byte in size. On Linux it is four bytes.
+The character type used by slinput is a typedef **sli_char**. The typedef declaration is in **slinput.h** and is inferred from system-specific macros. **sli_char** is one byte in size for the Atari ST. On Linux it is four bytes.
 
-**slinputc.h** also contains a define, **SLI_CHAR_SIZE**. This gives the size of **sli_char** in bytes as a preprocessor define, which can be useful in client code for conditional compilation (e.g. on the Atari ST which doesn't use multibyte characters).
+**slinput.h** also contains a define, **SLI_CHAR_SIZE**. This gives the size of **sli_char** in bytes as a preprocessor define, which can be useful in client code for conditional compilation (e.g. on the Atari ST which doesn't use multibyte characters).
 
 The Linux adaptation uses **mbsrtowcs** and **wcsrtombs** to convert between multibyte and wide characters. It is important therefore to set the locale for **LC_CTYPE** appropriately.
 
