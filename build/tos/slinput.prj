@@ -1,8 +1,6 @@
-slinputx.tos
+slinput.lib
+.C[-W-stv]
+.L[-J]
 =
-PCSTART.O
 ..\..\src\adapt\tos.c
-..\..\src\example\main.c
 ..\..\src\slinput.c
-PCSTDLIB.LIB
-PCTOSLIB.LIB

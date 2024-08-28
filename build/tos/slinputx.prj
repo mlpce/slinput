@@ -1,0 +1,8 @@
+slinputx.tos
+.C[-W-stv]
+=
+PCSTART.O
+..\..\src\example\main.c
+SLINPUT.LIB
+PCSTDLIB.LIB
+PCTOSLIB.LIB
