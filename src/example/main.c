@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef __PUREC__
+#if defined(__TOS__) && defined(__PUREC__)
 #define L ""
 #else
 #include <locale.h>
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
   SLINPUT_State *state;
   sli_char buffer[256];
 
-#ifndef __PUREC__
+#if !(defined(__TOS__) && defined(__PUREC__))
   if (setlocale(LC_CTYPE, "") == NULL)
     return EXIT_FAILURE;
 #endif
