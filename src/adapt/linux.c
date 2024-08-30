@@ -21,6 +21,7 @@ typedef struct LinuxInputStream {
   char *buffer;  /**< holds input bytes */
   size_t buffer_write_index;  /**< buffer index of next character to write */
   size_t buffer_read_index;  /**< buffer index of next character to read */
+  sli_ushort env_width;  /**< Width of terminal from environment */
 } LinuxInputStream;
 
 int SLINPUT_EnterRaw_Default(
@@ -419,20 +420,12 @@ int SLINPUT_GetTerminalWidth_Default(
     SLINPUT_Stream stream_in,
     sli_ushort *width) {
   LinuxInputStream *input = (LinuxInputStream *) stream_in.stream_data;
-  const int fd = fileno(input->file);
-  const char *env_columns = getenv("SLINPUT_COLUMNS");
   int result = 0;
 
-  *width = 0;
-  if (env_columns) {
-    int env_columns_number = atoi(env_columns);
-    if (env_columns_number >= SLINPUT_MIN_COLUMNS &&
-        env_columns_number <= SLINPUT_MAX_COLUMNS) {
-      *width = (sli_ushort) env_columns_number;
-    }
-  }
-
-  if (!*width) {
+  if (input->env_width) {
+    *width = input->env_width;
+  } else {
+    const int fd = fileno(input->file);
     struct winsize ws;
     result = ioctl(fd, TIOCGWINSZ, &ws);
     if (result == -1)
@@ -449,6 +442,7 @@ int SLINPUT_CreateStreams_Default(
     const SLINPUT_State *state,
     SLINPUT_Stream *stream_in,
     SLINPUT_Stream *stream_out) {
+  const char *env_columns = getenv("SLINPUT_COLUMNS");
   const TermInfo *term_info = &state->term_info;
   LinuxInputStream *input = term_info->malloc_in(term_info->alloc_info,
     sizeof(LinuxInputStream));
@@ -468,6 +462,15 @@ int SLINPUT_CreateStreams_Default(
   input->buffer[0] = '\0';
   input->buffer_write_index = 0;
   input->buffer_read_index = 0;
+
+  input->env_width = 0;
+  if (env_columns) {
+    int env_columns_number = atoi(env_columns);
+    if (env_columns_number >= SLINPUT_MIN_COLUMNS &&
+        env_columns_number <= SLINPUT_MAX_COLUMNS) {
+      input->env_width = (sli_ushort) env_columns_number;
+    }
+  }
 
   stream_in->stream_data = input;
   stream_out->stream_data = stdout;
