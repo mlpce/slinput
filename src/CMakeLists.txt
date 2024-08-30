@@ -14,12 +14,11 @@ add_library(slinput STATIC
   slinput.c
 )
 
-# Install the headers
-# slinput.h header is installed along with slinputc.h
+# slinput.h is the public header
 set(SLINPUT_PUBLIC_HEADERS "${CMAKE_SOURCE_DIR}/include/slinput.h")
 set_target_properties(slinput PROPERTIES PUBLIC_HEADER "${SLINPUT_PUBLIC_HEADERS}")
 
-# Install the slinput library
+# Install the slinput library and public header
 install(TARGETS slinput ARCHIVE DESTINATION lib PUBLIC_HEADER DESTINATION include)
 
 # Example program
