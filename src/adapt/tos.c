@@ -3,8 +3,17 @@
 #include <stdio.h>
 #include <tos.h>
 
+#if defined(__TOS__) && defined(__PUREC__)
+#include <linea.h>
+#endif
+
 #include "include/slinput.h"
 #include "src/slinputi.h"
+
+typedef struct TOSInputStream {
+  const unsigned char *linea_pb;  /**< Pointer to LineA parameter block */
+  sli_ushort env_width;  /**< Width of terminal from environment */
+} TOSInputStream;
 
 int SLINPUT_EnterRaw_Default(
     const SLINPUT_State *state,
@@ -109,8 +118,25 @@ int SLINPUT_Flush_Default(const SLINPUT_State *state,
   return fflush((FILE *) stream_out.stream_data) == 0 ? 0 : -1;
 }
 
+int SLINPUT_GetTerminalWidth_Default(const SLINPUT_State *state,
+    SLINPUT_Stream stream_in, sli_ushort *width) {
+  TOSInputStream *input = (TOSInputStream *) stream_in.stream_data;
+
+  if (input->env_width) {
+    *width = input->env_width;
+  } else if (input->linea_pb) {
+    /* Use negative line-a variable */
+    *width = *(const unsigned short *)(input->linea_pb-0x2c) + 1;
+  } else {
+    /* Can't get terminal width */
+    return -1;
+  }
+
+  return 0;
+}
+
 #ifdef __VBCC__
-static __regsused("d0/d1/a0/a1") LONG LineAParameterBlock(VOID) =
+static __regsused("d0/d1/a0/a1") LONG GetLineA_PB(VOID) =
   "\tmove.l\td2,-(sp)\n"
   "\tmove.l\ta2,-(sp)\n"
   "\tdc.w\t$A000\n"
@@ -118,42 +144,50 @@ static __regsused("d0/d1/a0/a1") LONG LineAParameterBlock(VOID) =
   "\tmove.l\t(sp)+,d2\n";
 #endif
 
-int SLINPUT_GetTerminalWidth_Default(const SLINPUT_State *state,
-    SLINPUT_Stream stream_in, sli_ushort *width) {
+/* Create default versions of input and output streams */
+int SLINPUT_CreateStreams_Default(const SLINPUT_State *state,
+    SLINPUT_Stream *stream_in, SLINPUT_Stream *stream_out) {
   const char *env_columns = getenv("SLINPUT_COLUMNS");
-  *width = 0;
+  const TermInfo *term_info = &state->term_info;
+  TOSInputStream *input = term_info->malloc_in(term_info->alloc_info,
+    sizeof(TOSInputStream));
+
+  if (!input)
+    return -1;
+
+  input->env_width = 0;
   if (env_columns) {
     int env_columns_number = atoi(env_columns);
     if (env_columns_number >= SLINPUT_MIN_COLUMNS &&
         env_columns_number <= SLINPUT_MAX_COLUMNS) {
-      *width = (sli_ushort) env_columns_number;
+      input->env_width = (sli_ushort) env_columns_number;
     }
   }
 
-  if (!*width ) {
-#ifdef __VBCC__
-    /* Use negative line-a variable */
-    const unsigned char *pb = (const unsigned char *) LineAParameterBlock();
-    *width = *(const unsigned short *)(pb-0x2c) + 1;
+  if (!input->env_width) {
+    /* Width not specified by environment, use LineA */
+#if defined(__TOS__) && defined(__PUREC__)
+    if (!Linea)
+      linea_init();
+    input->linea_pb = (const unsigned char *) Linea;
+#elif defined (__VBCC__)
+    input->linea_pb = (const unsigned char *) GetLineA_PB();
 #else
-    /* TODO: Pure C */
-    *width = 40;
+#error How to get LineA parameter block?
 #endif
   }
 
-  return 0;
-}
-
-/* Create default versions of input and output streams */
-int SLINPUT_CreateStreams_Default(const SLINPUT_State *state,
-    SLINPUT_Stream *stream_in, SLINPUT_Stream *stream_out) {
-  stream_in->stream_data = stdin;
+  stream_in->stream_data = input;
   stream_out->stream_data = stdout;
+
   return 0;
 }
 
 void SLINPUT_DestroyStreams_Default(const SLINPUT_State *state,
     SLINPUT_Stream *stream_in, SLINPUT_Stream *stream_out) {
+  const TermInfo *term_info = &state->term_info;
+
+  term_info->free_in(term_info->alloc_info, stream_in->stream_data);
   stream_in->stream_data = NULL;
   stream_out->stream_data = NULL;
 }
