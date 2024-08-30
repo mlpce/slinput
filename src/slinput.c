@@ -753,7 +753,6 @@ int SLINPUT_Get(SLINPUT_State *state, const sli_char *prompt,
 
   line_info->prompt_in = prompt;
   line_info->prompt = prompt;
-  line_info->buffer_size = buffer_chars;
   line_info->max_chars = buffer_chars - 1;
   line_info->buffer = buffer;
   line_info->end_ptr = buffer;
