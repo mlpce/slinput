@@ -114,7 +114,7 @@ static sli_char *CopyChars(sli_ushort max_chars, const sli_char *str,
 newline */
 static int LineEnter(SLINPUT_State *state) {
   SLINPUT_Stream stream = state->term_info.stream_out;
-  int result = (*state->term_info.putchar_out)(state, stream, '\n');
+  const int result = (*state->term_info.putchar_out)(state, stream, '\n');
   LineInfo *line_info = &state->line_info;
   if (line_info->end_ptr == line_info->buffer && line_info->max_chars) {
     *line_info->end_ptr++ = '\n';
@@ -306,8 +306,8 @@ static int LineKeyLeft(SLINPUT_State *state, int cursor_warp_enabled) {
   const TermInfo *term_info = &state->term_info;
   LineInfo *line_info = &state->line_info;
   const sli_char *orig_cursor_ptr = line_info->cursor_ptr;
+  const sli_char *orig_scroll_ptr;
   int result = 0;
-  sli_char *original_scroll_ptr;
   ptrdiff_t left_delta;
 
   if (!cursor_warp_enabled ||
@@ -333,7 +333,7 @@ static int LineKeyLeft(SLINPUT_State *state, int cursor_warp_enabled) {
   }
 
   /* Adjust scroll pointer if necessary */
-  original_scroll_ptr = line_info->scroll_ptr;
+  orig_scroll_ptr = line_info->scroll_ptr;
   left_delta = line_info->scroll_ptr + line_info->cursor_margin -
     line_info->cursor_ptr;
   if (left_delta > 0) {
@@ -342,7 +342,7 @@ static int LineKeyLeft(SLINPUT_State *state, int cursor_warp_enabled) {
       line_info->scroll_ptr = line_info->buffer;
   }
 
-  if (line_info->scroll_ptr != original_scroll_ptr) {
+  if (line_info->scroll_ptr != orig_scroll_ptr) {
     /* Scroll pointer has changed so redraw the line */
     result = RedrawLine(state);
   } else {
@@ -363,8 +363,8 @@ static int LineKeyRight(SLINPUT_State *state, int cursor_warp_enabled) {
   const TermInfo *term_info = &state->term_info;
   LineInfo *line_info = &state->line_info;
   const sli_char *orig_cursor_ptr = line_info->cursor_ptr;
+  const sli_char *orig_scroll_ptr;
   int result = 0;
-  sli_char *original_scroll_ptr;
   ptrdiff_t right_delta;
 
   if (!cursor_warp_enabled ||
@@ -390,7 +390,7 @@ static int LineKeyRight(SLINPUT_State *state, int cursor_warp_enabled) {
   }
 
   /* Adjust scroll pointer if necessary */
-  original_scroll_ptr = line_info->scroll_ptr;
+  orig_scroll_ptr = line_info->scroll_ptr;
   right_delta = line_info->cursor_ptr - line_info->scroll_ptr -
     line_info->fit_len + line_info->cursor_margin;
   if (right_delta > 0) {
@@ -402,7 +402,7 @@ static int LineKeyRight(SLINPUT_State *state, int cursor_warp_enabled) {
     }
   }
 
-  if (line_info->scroll_ptr != original_scroll_ptr) {
+  if (line_info->scroll_ptr != orig_scroll_ptr) {
     /* Scroll pointer has changed so redraw the line */
     result = RedrawLine(state);
   } else {
