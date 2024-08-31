@@ -10,11 +10,11 @@ I created this so I could use the terminal in Atari ST low resolution mode (40 c
 
 ## Adaptations
 
-The library builds for both Atari ST (using vbcc cross compiler) and Linux (tested with g++) using cmake. The library itself uses C. The unit tests build optionally (configurable via cmake) and will only work for Linux - these use Google Test and C++.
+The library builds for both Atari ST (using vbcc cross compiler or Pure C native compiler) and Linux (tested with g++) using cmake. The library itself uses C. The unit tests build optionally (configurable via cmake) and will only work for Linux - these use Google Test and C++.
 
-## Building
+## Building using cmake on Linux
 
-### Atari ST
+### Atari ST cross compile
 
 A directory exists called **build/tos**. Within this directory is a toolchain file for vbcc: **vbcc_tc.cmk**.
 
@@ -27,7 +27,7 @@ In the ccmake GUI there will be options to set **CMAKE_BUILD_TYPE** (Release, De
 
 Note the directive set(CMAKE_C_COMPILER vc +tos) in the toolchain file. This sets vc to build using 32 bit int. Change +tos to +tos16 here to build with 16 bit ints.
 
-### Linux
+### Linux native compile
 
 A directory exists called **build/linux**. This just contains a .gitignore file.
 
@@ -44,6 +44,12 @@ The **libslinput.a** library will be installed along with the API header **slinp
 If unit tests are enabled, then an executable **slinputt** will also be installed containing the unit tests, along with some other google test headers and libraries.
 
 A simple example application (source code at **src/example/main.c**) will also be compiled and linked. However this is not installed by make install. After building it can be found at **build/tos/src/example/slinputx.tos** or **build/linux/src/example/slinputx**.
+
+## Atari ST Pure C native compile
+
+Within **build/tos** are two Pure C project files, **slinput.prj** and **slinputx.prj**. The former builds the slinput library as **SLINPUT.LIB**, the latter builds the example executable **SLINPUTX.TOS**. As SLINPUTX.TOS is linked with SLINPUT.LIB, the library must be built first.
+
+Within the Pure C user interface, choose menu option Project->Select and choose SLINPUT.PRJ. Then build the library using menu option Project->Make all "SLINPUT.PRJ". Repeat the steps with SLINPUTX.PRJ to build the example application. The library and executable are created in the build/tos directory.
 
 ## Using the library
 
