@@ -1,0 +1,6 @@
+slinput.lib
+.C[-W-stv]
+.L[-J]
+=
+..\..\..\src\adapt\tos.c
+..\..\..\src\slinput.c
