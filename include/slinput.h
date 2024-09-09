@@ -398,7 +398,7 @@ void SLINPUT_Set_CursorMargin(
  * @param[in] continuation_character_left the character.
  * @note If this function is not called, then '<' is used.
  */
-void SLINPUT_Set_ContinuationCharacterLeft(
+void SLINPUT_Set_ContinueCharLeft(
   SLINPUT_State *state,
   sli_char continuation_character_left);
 
@@ -408,7 +408,7 @@ void SLINPUT_Set_ContinuationCharacterLeft(
  * @param[in] continuation_character_right the character.
  * @note If this function is not called, then '>' is used.
  */
-void SLINPUT_Set_ContinuationCharacterRight(
+void SLINPUT_Set_ContinueCharRight(
   SLINPUT_State *state,
   sli_char continuation_character_right);
 

@@ -56,8 +56,8 @@ class SingleLineInput : public ::testing::Test {
 
     SLINPUT_Set_NumColumns(state, 0);
     SLINPUT_Set_CursorMargin(state, 0);
-    SLINPUT_Set_ContinuationCharacterLeft(state, L' ');
-    SLINPUT_Set_ContinuationCharacterRight(state, L' ');
+    SLINPUT_Set_ContinueCharLeft(state, L' ');
+    SLINPUT_Set_ContinueCharRight(state, L' ');
   }
 
   /** Holds an input (key code or character) */
@@ -1454,8 +1454,8 @@ TEST_F(SingleLineInput, InsertToScrollFiveMarginThenWarpAndEndWithContinuationCh
   /* Testing with five margin */
   SLINPUT_Set_CursorMargin(state, 5);
   /* Testing with continuation characters */
-  SLINPUT_Set_ContinuationCharacterLeft(state, L'\x2190');
-  SLINPUT_Set_ContinuationCharacterRight(state, L'\x2192');
+  SLINPUT_Set_ContinueCharLeft(state, L'\x2190');
+  SLINPUT_Set_ContinueCharRight(state, L'\x2192');
 
   sli_char buffer[40];
   terminal_width_ = 20;

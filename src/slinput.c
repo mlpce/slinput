@@ -933,14 +933,14 @@ void SLINPUT_Set_CursorMargin(SLINPUT_State *state,
 }
 
 /* Set left continuation character */
-void SLINPUT_Set_ContinuationCharacterLeft(
+void SLINPUT_Set_ContinueCharLeft(
     SLINPUT_State *state,
     sli_char continuation_character_left) {
   state->term_info.continuation_character_left = continuation_character_left;
 }
 
 /* Set right continuation character */
-void SLINPUT_Set_ContinuationCharacterRight(
+void SLINPUT_Set_ContinueCharRight(
     SLINPUT_State *state,
     sli_char continuation_character_right) {
   state->term_info.continuation_character_right = continuation_character_right;
@@ -1003,8 +1003,8 @@ SLINPUT_State *SLINPUT_CreateState(
 
   SLINPUT_Set_NumColumns(state, 0);
   SLINPUT_Set_CursorMargin(state, 5);
-  SLINPUT_Set_ContinuationCharacterLeft(state, '<');
-  SLINPUT_Set_ContinuationCharacterRight(state, '>');
+  SLINPUT_Set_ContinueCharLeft(state, '<');
+  SLINPUT_Set_ContinueCharRight(state, '>');
 
   return state;
 }
