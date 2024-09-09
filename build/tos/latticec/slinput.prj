@@ -1,0 +1,6 @@
+SLINPUT.LIB
+.C	[-b4 -r6 -d0 -m0 -rs -n48 -fm -i..\..\..\]
+.S	[-m0]
+=
+..\..\..\SRC\ADAPT\TOS.C
+..\..\..\SRC\SLINPUT.C

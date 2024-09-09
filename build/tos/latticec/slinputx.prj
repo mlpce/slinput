@@ -1,0 +1,8 @@
+SLINPUTX.TOS
+.C	[-b4 -r6 -d0 -m0 -rs -fm -i..\..\..\]
+.S	[-m0]
+=
+C.O
+..\..\..\SRC\EXAMPLE\MAIN.C	(SLINPUT.LIB)
+SLINPUT.LIB
+LC.LIB

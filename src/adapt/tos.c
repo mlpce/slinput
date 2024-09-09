@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <tos.h>
 
-#if defined(__TOS__) && defined(__PUREC__)
+#if (defined(__TOS__) && defined(__PUREC__)) || \
+    (defined(ATARI) && defined(LATTICE))
 #include <linea.h>
 #endif
 
@@ -170,6 +171,8 @@ int SLINPUT_CreateStreams_Default(const SLINPUT_State *state,
     if (!Linea)
       linea_init();
     input->linea_pb = (const unsigned char *) Linea;
+#elif (defined(ATARI) && defined(LATTICE))
+    input->linea_pb = (const unsigned char *) linea0();
 #elif defined (__VBCC__)
     input->linea_pb = (const unsigned char *) GetLineA_PB();
 #else

@@ -10,6 +10,9 @@
 #if defined(__VBCC__)
 #define SLI_CHAR_SIZE 1
 typedef wchar_t sli_char;
+#elif (defined(ATARI) && defined(LATTICE))
+#define SLI_CHAR_SIZE 1
+typedef wchar_t sli_char;
 #elif (defined(__TOS__) && defined(__PUREC__))
 #define SLI_CHAR_SIZE 1
 typedef char sli_char;
