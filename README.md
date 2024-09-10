@@ -10,16 +10,24 @@ I created this so I could use the terminal in Atari ST low resolution mode (40 c
 
 ## Adaptations
 
-The library builds for both Atari ST (using vbcc cross compiler or Pure C native compiler) and Linux (tested with g++) using cmake. The library itself uses C. The unit tests build optionally (configurable via cmake) and will only work for Linux - these use Google Test and C++.
+The library builds for both Atari ST and Linux. The library itself uses C. The unit tests build optionally and will only work for Linux - these use Google Test and C++.
 
-## Building using cmake on Linux
+### Atari ST build systems
+* vbcc cross compiler (Linux host) with cmake
+* Pure C native (tested with v1.1)
+* Lattice C native (tested with v5.6)
 
-### Atari ST cross compile
+### Linux build system
+* g++ with cmake
 
-A directory exists called **build/tos**. Within this directory is a toolchain file for vbcc: **vbcc_tc.cmk**.
+## Building using cmake on Linux host
+
+### Atari ST vbcc cross compile
+
+A directory exists called **build/tos/vbcc**. Within this directory is a toolchain file for vbcc: **vbcc_tc.cmk**.
 
 Change to this directory then invoke configuration with:
-**ccmake --toolchain ./vbcc_tc.cmk ../..**
+**ccmake --toolchain ./vbcc_tc.cmk ../../..**
 
 The toolchain file expects the VBCC environment variable to be set and the directory containing vc to be in the PATH search path (see VBCC documents on how to setup VBCC).
 
@@ -43,13 +51,21 @@ The **libslinput.a** library will be installed along with the API header **slinp
 
 If unit tests are enabled, then an executable **slinputt** will also be installed containing the unit tests, along with some other google test headers and libraries.
 
-A simple example application (source code at **src/example/main.c**) will also be compiled and linked. However this is not installed by make install. After building it can be found at **build/tos/src/example/slinputx.tos** or **build/linux/src/example/slinputx**.
+A simple example application (source code at **src/example/main.c**) will also be compiled and linked. However this is not installed by make install. After building it can be found at **build/tos/vbcc/src/example/slinputx.tos** or **build/linux/src/example/slinputx**.
 
-## Atari ST Pure C native compile
+## Atari ST native compile
 
-Within **build/tos** are two Pure C project files, **slinput.prj** and **slinputx.prj**. The former builds the slinput library as **SLINPUT.LIB**, the latter builds the example executable **SLINPUTX.TOS**. As SLINPUTX.TOS is linked with SLINPUT.LIB, the library must be built first.
+### Pure C
 
-Within the Pure C user interface, choose menu option Project->Select and choose SLINPUT.PRJ. Then build the library using menu option Project->Make all "SLINPUT.PRJ". Repeat the steps with SLINPUTX.PRJ to build the example application. The library and executable are created in the build/tos directory.
+Within **build/tos/purec** are two Pure C project files, **slinput.prj** and **slinputx.prj**. The former builds the slinput library as **SLINPUT.LIB**, the latter builds the example executable **SLINPUTX.TOS**. As SLINPUTX.TOS is linked with SLINPUT.LIB, the library must be built first.
+
+Within the Pure C user interface, choose menu option Project->Select and choose SLINPUT.PRJ. Then build the library using menu option Project->Make all "SLINPUT.PRJ". Repeat the steps with SLINPUTX.PRJ to build the example application. The library and executable are created in the build/tos/purec directory.
+
+### Lattice C
+
+Within **build/tos/latticec** are two Lattice C project files, **slinput.prj** and **slinputx.prj**. The former builds the slinput library as **SLINPUT.LIB**, the latter buids the example executable **SLINPUTX.TOS**. As SLINPUTX.TOS is linked with SLINPUT.LIB, the library must be built first.
+
+Within the Lattice C user interface, choose menu option Project->Load and choose SLINPUT.PRJ. Then build the library using menu option Project->Make all "SLINPUT". Repeat the steps with SLINPUTX.PRJ to build the example application. The library and executable are created in the build/tos/latticec directory.
 
 ## Using the library
 
