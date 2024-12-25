@@ -1,0 +1,20 @@
+# the name of the target operating system
+set(CMAKE_SYSTEM_NAME AtariTOS)
+set(CMAKE_SYSTEM_VERSION 1)
+
+set(CMAKE_C_COMPILER m68k-atari-mint-gcc -mshort)
+
+# where the target environment is located
+# set(CMAKE_FIND_ROOT_PATH  ~/install)
+
+# adjust the default behavior of the FIND_XXX() commands:
+# search programs in the host environment
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+
+# search headers and libraries in the target environment
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+# Building for atari tos using the gcc compiler
+set(ATARI_TOS_ENABLED true)
+set(ATARI_TOS_16BIT_INT true)

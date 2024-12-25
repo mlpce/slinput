@@ -1,5 +1,5 @@
 /**
-@file slinput_internal.h
+@file slinputi.h
 @brief slinput header
 */
 #ifndef SLINPUT_INTERNAL_HEADER

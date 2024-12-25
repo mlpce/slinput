@@ -9,15 +9,23 @@
 
 #if defined(__VBCC__)
 #define SLI_CHAR_SIZE 1
+#define SLI_CHAR_STRL(x) L##x
 typedef wchar_t sli_char;
 #elif (defined(ATARI) && defined(LATTICE))
 #define SLI_CHAR_SIZE 1
+#define SLI_CHAR_STRL(x) L##x
 typedef wchar_t sli_char;
 #elif (defined(__TOS__) && defined(__PUREC__))
 #define SLI_CHAR_SIZE 1
+#define SLI_CHAR_STRL(x) x
+typedef char sli_char;
+#elif (defined(__GNUC__) && defined(__atarist__))
+#define SLI_CHAR_SIZE 1
+#define SLI_CHAR_STRL(x) x
 typedef char sli_char;
 #elif defined(__linux__)
 #define SLI_CHAR_SIZE 4
+#define SLI_CHAR_STRL(x) L##x
 typedef wchar_t sli_char;
 #else
 #error Unknown sli_char type definition

@@ -1,11 +1,25 @@
 #include <stdlib.h>
-#include <ctype.h>
 #include <stdio.h>
-#include <tos.h>
 
-#if (defined(__TOS__) && defined(__PUREC__)) || \
-    (defined(ATARI) && defined(LATTICE))
+#if defined(__TOS__) && defined(__PUREC__)
+#include <tos.h>
 #include <linea.h>
+#elif (defined(ATARI) && defined(LATTICE))
+#include <tos.h>
+#include <linea.h>
+#elif defined (__VBCC__)
+#include <tos.h>
+#elif (defined(__GNUC__) && defined(__atarist__))
+#include <osbind.h>
+#include <mint/linea.h>
+#else
+#error What includes for this compiler?
+#endif
+
+#if (defined(ATARI) && defined(LATTICE))
+#define CCONWS(c) (Cconws(c), 0)
+#else
+#define CCONWS(c) (Cconws(c))
 #endif
 
 #include "include/slinput.h"
@@ -41,8 +55,8 @@ int SLINPUT_GetCharIn_Default(const SLINPUT_State *state,
   const int right_shift = !!(kbshift_state & 0x2);
   const int shifted = left_shift | right_shift;
 
-  const unsigned char kcv = cin >> 16;
-  const unsigned char chv = cin & 0xff;
+  const unsigned char kcv = (unsigned char) (cin >> 16);
+  const unsigned char chv = (unsigned char) (cin & 0xff);
 
   SLINPUT_KeyCode kc_enum_value = SLINPUT_KC_NUL;
 
@@ -86,7 +100,7 @@ int SLINPUT_GetCharIn_Default(const SLINPUT_State *state,
   if (key_code)
     *key_code = kc_enum_value;
   if (character)
-    *character = chv;
+    *character = (sli_char) chv;
 
   return 0;
 }
@@ -98,7 +112,7 @@ int SLINPUT_IsCharAvailable_Default(const SLINPUT_State *state,
 
 int SLINPUT_IsSpace_Default(const SLINPUT_State *state,
     SLINPUT_Stream stream_in, sli_char character) {
-  return isspace(character);
+  return character == 32;
 }
 
 void *SLINPUT_Malloc_Default(SLINPUT_AllocInfo alloc_info, size_t size) {
@@ -111,12 +125,12 @@ void SLINPUT_Free_Default(SLINPUT_AllocInfo alloc_info, void *ptr) {
 
 int SLINPUT_Putchar_Default(const SLINPUT_State *state,
     SLINPUT_Stream stream_out, sli_char c) {
-  return fputc(c, (FILE *) stream_out.stream_data) != EOF ? 0 : -1;
+  return c == '\n' ? CCONWS("\n\r") == 0 ? 0 : -1 : (Cconout(c), 0);
 }
 
 int SLINPUT_Flush_Default(const SLINPUT_State *state,
     SLINPUT_Stream stream_out) {
-  return fflush((FILE *) stream_out.stream_data) == 0 ? 0 : -1;
+  return 0;
 }
 
 int SLINPUT_GetTerminalWidth_Default(const SLINPUT_State *state,
@@ -127,7 +141,7 @@ int SLINPUT_GetTerminalWidth_Default(const SLINPUT_State *state,
     *width = input->env_width;
   } else if (input->linea_pb) {
     /* Use negative line-a variable */
-    *width = *(const unsigned short *)(input->linea_pb-0x2c) + 1;
+    *width = (sli_ushort) (*(const sli_ushort *)(input->linea_pb-0x2c) + 1u);
   } else {
     /* Can't get terminal width */
     return -1;
@@ -175,13 +189,17 @@ int SLINPUT_CreateStreams_Default(const SLINPUT_State *state,
     input->linea_pb = (const unsigned char *) linea0();
 #elif defined (__VBCC__)
     input->linea_pb = (const unsigned char *) GetLineA_PB();
+#elif (defined(__GNUC__) && defined(__atarist__))
+    if (!__aline)
+      linea0();
+    input->linea_pb = (const unsigned char *) __aline;
 #else
 #error How to get LineA parameter block?
 #endif
   }
 
   stream_in->stream_data = input;
-  stream_out->stream_data = stdout;
+  stream_out->stream_data = NULL;
 
   return 0;
 }
@@ -217,5 +235,5 @@ int SLINPUT_CursorControl_Default(
     return -1;
 
   code = SLINPUT_CursorControlTable[cursor_control_code];
-  return fprintf((FILE *)stream_out.stream_data, "%s", code);
+  return CCONWS(code) == 0 ? 0 : -1;
 }

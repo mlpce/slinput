@@ -141,9 +141,8 @@ static int RedrawLine(SLINPUT_State *state) {
   /* Left continuation character */
   result = Minimum(result,
     term_info->putchar_out(state, term_info->stream_out,
-    line_info->scroll_ptr != line_info->buffer ?
-    term_info->continuation_character_left : ' '));
-
+    (sli_char) (line_info->scroll_ptr != line_info->buffer ?
+    term_info->continuation_character_left : ' ')));
   result = Minimum(result,
     OutputMaxChars(state,
     line_info->cursor_ptr - line_info->scroll_ptr,
@@ -158,9 +157,9 @@ static int RedrawLine(SLINPUT_State *state) {
 
   /* Right continuation character */
   result = Minimum(result,
-    term_info->putchar_out(state, term_info->stream_out,
-    line_info->scroll_ptr + line_info->fit_len < line_info->end_ptr ?
-    term_info->continuation_character_right : ' '));
+    term_info->putchar_out(state, term_info->stream_out, (sli_char)
+    (line_info->scroll_ptr + line_info->fit_len < line_info->end_ptr ?
+    term_info->continuation_character_right : ' ')));
 
   result = Minimum(result,
     term_info->cursor_control_out(state, term_info->stream_out,
@@ -195,9 +194,9 @@ static int RedrawLineFromCursor(SLINPUT_State *state) {
 
   /* Right continuation character */
   result = Minimum(result,
-    term_info->putchar_out(state, term_info->stream_out,
-    line_info->scroll_ptr + line_info->fit_len < line_info->end_ptr ?
-    term_info->continuation_character_right : ' '));
+    term_info->putchar_out(state, term_info->stream_out, (sli_char)
+    (line_info->scroll_ptr + line_info->fit_len < line_info->end_ptr ?
+    term_info->continuation_character_right : ' ')));
 
   result = Minimum(result,
     term_info->cursor_control_out(state, term_info->stream_out,
@@ -477,9 +476,9 @@ static int LineCharIn(SLINPUT_State *state, sli_char char_in) {
 
       /* Right continuation character */
       result = Minimum(result,
-        term_info->putchar_out(state, term_info->stream_out,
-          line_info->scroll_ptr + line_info->fit_len < line_info->end_ptr ?
-          term_info->continuation_character_right : ' '));
+        term_info->putchar_out(state, term_info->stream_out, (sli_char)
+        (line_info->scroll_ptr + line_info->fit_len < line_info->end_ptr ?
+        term_info->continuation_character_right : ' ')));
 
       result = Minimum(result,
         term_info->cursor_control_out(state, term_info->stream_out,
@@ -536,7 +535,7 @@ static int ApplyDimension(SLINPUT_State *state) {
   display an actual character from the input string, this gives the value for
   SLINPUT_MIN_COLUMNS as 4. The choice for SLINPUT_MAX_COLUMNS is arbitary,
   but signed 16bit values are used for column computations. */
-  columns -= 3;
+  columns = (sli_ushort) (columns - 3u);
 
   /* Now we know the number of columns available, we make choices of how we
   render. The choices being the prompt, the cursor margin and the actual input
@@ -576,7 +575,7 @@ static int ApplyDimension(SLINPUT_State *state) {
 
   /* If there's been no change in available columns, then don't need to
   redraw anything or change the scroll_ptr. */
-  if (columns == line_info->columns)
+  if ((sli_sshort) columns == line_info->columns)
     return 0;
  
   /* Dimensions have changed. Keep the current cursor pointer and adjust the
@@ -618,7 +617,8 @@ static int FlushInput(SLINPUT_State *state) {
 /* Processes input until enter is pressed or end of transmission */
 static int ProcessInput(SLINPUT_State *state) {
   const TermInfo *term_info = &state->term_info;
-  const sli_sshort max_history_index = term_info->num_history - 1;
+  const sli_sshort max_history_index =
+    (sli_sshort) (term_info->num_history - 1);
   sli_sshort history_index = -1;
   int result;
 
@@ -753,7 +753,7 @@ int SLINPUT_Get(SLINPUT_State *state, const sli_char *prompt,
 
   line_info->prompt_in = prompt;
   line_info->prompt = prompt;
-  line_info->max_chars = buffer_chars - 1;
+  line_info->max_chars = (sli_ushort) (buffer_chars - 1u);
   line_info->buffer = buffer;
   line_info->end_ptr = buffer;
   line_info->cursor_ptr = buffer;
@@ -1012,7 +1012,7 @@ SLINPUT_State *SLINPUT_CreateState(
 /* Destroys the state */
 void SLINPUT_DestroyState(SLINPUT_State *state) {
   TermInfo *term_info;
-  sli_ushort index;
+  sli_sshort index;
 
   if (!state)
     return;

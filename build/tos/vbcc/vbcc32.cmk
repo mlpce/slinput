@@ -12,9 +12,9 @@ set(CMAKE_C_COMPILER vc +tos)
 
 # build flags
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_C_FLAGS_MINSIZEREL "-O1 -size")
-set(CMAKE_C_FLAGS_RELEASE "-O2")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+set(CMAKE_C_FLAGS_MINSIZEREL "-O1 -size -DNDEBUG")
+set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
 
 # where the target environment is located
 set(CMAKE_FIND_ROOT_PATH  $ENV{VBCC}/targets/m68k-atari)
@@ -28,4 +28,5 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 # Building for atari tos using the VBCC compiler
-set(ATARI_TOS_VBCC_ENABLED true)
+set(ATARI_TOS_ENABLED true)
+set(ATARI_TOS_16BIT_INT false)

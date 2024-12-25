@@ -14,6 +14,7 @@ The library builds for both Atari ST and Linux. The library itself uses C. The u
 
 ### Atari ST build systems
 * vbcc cross compiler (Linux host) with cmake
+* gcc cross compiler (Linux host) with cmake (tested with gcc 4.6.4)
 * Pure C native (tested with v1.1)
 * Lattice C native (tested with v5.6)
 
@@ -24,16 +25,27 @@ The library builds for both Atari ST and Linux. The library itself uses C. The u
 
 ### Atari ST vbcc cross compile
 
-A directory exists called **build/tos/vbcc**. Within this directory is a toolchain file for vbcc: **vbcc_tc.cmk**.
+A directory exists called **build/tos/vbcc**. Within this directory are toolchain files for vbcc: **vbcc32.cmk** and **vbcc16.cmk**. The 32 version uses 32 bit int, the 16 version 16 bit int.
 
 Change to this directory then invoke configuration with:
-**ccmake --toolchain ./vbcc_tc.cmk ../../..**
+**ccmake --toolchain ./vbcc32.cmk ../../..**
 
 The toolchain file expects the VBCC environment variable to be set and the directory containing vc to be in the PATH search path (see VBCC documents on how to setup VBCC).
 
 In the ccmake GUI there will be options to set **CMAKE_BUILD_TYPE** (Release, Debug, ...) and **CMAKE_INSTALL_PREFIX** (installation path for make install). There is also the option **UNITTESTS_ENABLED** which defaults to OFF. Leave this OFF for Atari ST build as the unit tests are not supported.
 
-Note the directive set(CMAKE_C_COMPILER vc +tos) in the toolchain file. This sets vc to build using 32 bit int. Change +tos to +tos16 here to build with 16 bit ints.
+Note the directive **set(CMAKE_C_COMPILER vc +tos)** in the vbcc32.cmk file. The +tos sets vc to build for tos using 32 bit int. vbcc16.cmk uses +tos16 instead to build with 16 bit ints.
+
+### Atari ST gcc cross compile
+
+A directory exists called **build/tos/gcc**. Within this directory are toolchain files for gcc: **gcc32.cmk** and **gcc16.cmk**. The 32 version uses 32 bit int, the 16 version 16 bit int.
+The compiler is set to **m68k-atari-mint-gcc**.
+
+In the ccmake GUI there will be options to set **CMAKE_BUILD_TYPE** (Release, Debug, ...) and **CMAKE_INSTALL_PREFIX** (installation path for make install). There is also the option **UNITTESTS_ENABLED** which defaults to OFF. Leave this OFF for Atari ST build as the unit tests are not supported.
+
+There is also the option for the gcc cross compile which is **LIBCMINI_ENABLED** which defaults to off. When enabled three more settings will appear: **LIBCMINI_INCLUDE_PATH**, **LIBCMINI_LIBRARY_PATH** and **LIBCMINI_STARTUP_PATH** which can be set to the libcmini paths for an already existing libcmini installation.
+
+NOTE: libcmini is only used when linking the example application slinputx.tos described below. When cross compiling with gcc for 16 bit int then it is better to use libcmini, otherwise e.g. isspace gives unexpected results. For this reason SLINPUT_IsSpace_Default in tos.c has been changed to a simple value check.
 
 ### Linux native compile
 
@@ -51,7 +63,7 @@ The **libslinput.a** library will be installed along with the API header **slinp
 
 If unit tests are enabled, then an executable **slinputt** will also be installed containing the unit tests, along with some other google test headers and libraries.
 
-A simple example application (source code at **src/example/main.c**) will also be compiled and linked. However this is not installed by make install. After building it can be found at **build/tos/vbcc/src/example/slinputx.tos** or **build/linux/src/example/slinputx**.
+A simple example application (source code at **src/example/main.c**) will also be compiled and linked. However this is not installed by make install. After building it can be found at **build/tos/vbcc/src/example/slinputx.tos**, **build/tos/gcc/src/example/slinputx.tos** or **build/linux/src/example/slinputx**. If libcmini is enabled for gcc cross compile, slinputx.tos will be linked to use libcmini instead of the default standard library. 
 
 ## Atari ST native compile
 
@@ -79,9 +91,9 @@ Follow these steps to use the library, as shown in **src/example/main.c**:
 
 ## Character type and size
 
-The character type used by slinput is a typedef **sli_char**. The typedef declaration is in **slinput.h** and is inferred from system-specific macros. **sli_char** is one byte in size for the Atari ST. On Linux it is four bytes.
+The character type used by slinput is a typedef **sli_char**. The typedef declaration is in **slinput.h** and is inferred from system-specific macros. sli_char is one byte in size for the Atari ST. On Linux it is four bytes.
 
-**slinput.h** also contains a define, **SLI_CHAR_SIZE**. This gives the size of **sli_char** in bytes as a preprocessor define, which can be useful in client code for conditional compilation (e.g. on the Atari ST which doesn't use multibyte characters).
+**slinput.h** also contains some defines, **SLI_CHAR_SIZE** and **SLI_CHAR_STRL**. SLI_CHAR_SIZE gives the size of sli_char in bytes as a preprocessor define, which can be useful in client code for conditional compilation (e.g. on the Atari ST which doesn't use multibyte characters). SLI_CHAR_STRL can be used when writing C string literals. It will place L infront of the literal when sli_char is defined to be wchar_t. 
 
 The Linux adaptation uses **mbsrtowcs** and **wcsrtombs** to convert between multibyte and wide characters. It is important therefore to set the locale for **LC_CTYPE** appropriately.
 
