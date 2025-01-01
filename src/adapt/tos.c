@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
 
 #if defined(__TOS__) && defined(__PUREC__)
 #include <tos.h>
