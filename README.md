@@ -45,7 +45,7 @@ In the ccmake GUI there will be options to set **CMAKE_BUILD_TYPE** (Release, De
 
 There is also the option for the gcc cross compile which is **LIBCMINI_ENABLED** which defaults to off. When enabled three more settings will appear: **LIBCMINI_INCLUDE_PATH**, **LIBCMINI_LIBRARY_PATH** and **LIBCMINI_STARTUP_PATH** which can be set to the libcmini paths for an already existing libcmini installation.
 
-NOTE: libcmini is only used when linking the example application slinputx.tos described below. When cross compiling with gcc for 16 bit int then it is better to use libcmini, otherwise e.g. isspace gives unexpected results. For this reason SLINPUT_IsSpace_Default in tos.c has been changed to a simple value check.
+NOTE: When cross compiling with gcc for 16 bit int then it is better to use libcmini, otherwise e.g. isspace gives unexpected results. For this reason SLINPUT_IsSpace_Default in tos.c has been changed to a simple value check.
 
 ### Linux native compile
 
