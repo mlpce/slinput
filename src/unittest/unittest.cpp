@@ -2153,3 +2153,110 @@ TEST_F(SingleLineInput, InitialString) {
   SLINPUT_DestroyState(state);
   EXPECT_EQ(allocated_memory_, 0);
 }
+
+/* A zero character buffer must fail */
+TEST_F(SingleLineInput, ZeroCharacterBuffer) {
+  SLINPUT_Stream stream = { this };
+  SLINPUT_AllocInfo alloc_info = { this };
+  SLINPUT_State *state =
+    SLINPUT_CreateState(alloc_info, MallocIn, FreeIn);
+  ASSERT_TRUE(state);
+  SLINPUT_Set_Streams(state, stream, stream);
+  InitState(state);
+
+  sli_char *buffer;  /* Pointer left uninitialized */
+  terminal_width_ = 20;
+
+  /* Characters followed by new line */
+  const sli_char *input = L"String\n";
+  while (*input)
+    input_.push_back( KeyInput { SLINPUT_KC_NUL, *input++ } );
+
+  /* Length of buffer is zero - Call to SLINPUT_Get must fail */
+  EXPECT_LT(SLINPUT_Get(state, L"> ", nullptr, 0, buffer), 0);
+  EXPECT_TRUE(output_.empty());
+
+  SLINPUT_DestroyState(state);
+  EXPECT_EQ(allocated_memory_, 0);
+}
+
+/* A one character buffer must succeed but with zero characters input. */
+TEST_F(SingleLineInput, OneCharacterBuffer) {
+  SLINPUT_Stream stream = { this };
+  SLINPUT_AllocInfo alloc_info = { this };
+  SLINPUT_State *state =
+    SLINPUT_CreateState(alloc_info, MallocIn, FreeIn);
+  ASSERT_TRUE(state);
+  SLINPUT_Set_Streams(state, stream, stream);
+  InitState(state);
+
+  /* One character buffer only has space for '\0' */
+  sli_char buffer[1] = {
+    '\001'  /* Must be replaced by '\0' */
+  };
+  terminal_width_ = 20;
+
+  /* Characters followed by new line */
+  const sli_char *input = L"String\n";
+  while (*input)
+    input_.push_back( KeyInput { SLINPUT_KC_NUL, *input++ } );
+
+  EXPECT_EQ(SLINPUT_Get(state, L"> ", nullptr,
+    sizeof(buffer)/sizeof(buffer[0]), buffer), 0);
+  EXPECT_EQ(buffer[0], 0);
+
+  EXPECT_STREQ(output_.c_str(),
+    /* Line wrap off*/
+    L"[SLINPUT_CCC_WRAP_OFF]"
+    /* ApplyDimension and RedrawLine */
+    L"[SLINPUT_CCC_DISABLE_CURSOR][SLINPUT_CCC_CLEAR_LINE]>  [SLINPUT_CCC_SAVE_CURSOR] [SLINPUT_CCC_RESTORE_CURSOR][SLINPUT_CCC_ENABLE_CURSOR]"
+    /* Key presses - no characters can be input therefore non are displayed */
+    /* New line */
+    L"\n"
+    /* Line wrap on */
+    L"[SLINPUT_CCC_WRAP_ON]"
+  );
+
+  SLINPUT_DestroyState(state);
+  EXPECT_EQ(allocated_memory_, 0);
+}
+
+/* A two character buffer must succeed but only allow one character input */
+TEST_F(SingleLineInput, TwoCharacterBuffer) {
+  SLINPUT_Stream stream = { this };
+  SLINPUT_AllocInfo alloc_info = { this };
+  SLINPUT_State *state =
+    SLINPUT_CreateState(alloc_info, MallocIn, FreeIn);
+  ASSERT_TRUE(state);
+  SLINPUT_Set_Streams(state, stream, stream);
+  InitState(state);
+
+  sli_char buffer[2]; /* Two character buffer */
+  terminal_width_ = 20;
+
+  /* Characters followed by new line */
+  const sli_char *input = L"String\n";
+  while (*input)
+    input_.push_back( KeyInput { SLINPUT_KC_NUL, *input++ } );
+
+  /* Only one character input */
+  EXPECT_EQ(SLINPUT_Get(state, L"> ", nullptr,
+    sizeof(buffer)/sizeof(buffer[0]), buffer), 1);
+  EXPECT_STREQ(buffer, L"S");
+
+  EXPECT_STREQ(output_.c_str(),
+    /* Line wrap off*/
+    L"[SLINPUT_CCC_WRAP_OFF]"
+    /* ApplyDimension and RedrawLine */
+    L"[SLINPUT_CCC_DISABLE_CURSOR][SLINPUT_CCC_CLEAR_LINE]>  [SLINPUT_CCC_SAVE_CURSOR] [SLINPUT_CCC_RESTORE_CURSOR][SLINPUT_CCC_ENABLE_CURSOR]"
+    /* Key presses - only one character can be input */
+    L"[SLINPUT_CCC_DISABLE_CURSOR]S[SLINPUT_CCC_SAVE_CURSOR] [SLINPUT_CCC_RESTORE_CURSOR][SLINPUT_CCC_ENABLE_CURSOR]"
+    /* New line */
+    L"\n"
+    /* Line wrap on */
+    L"[SLINPUT_CCC_WRAP_ON]"
+  );
+
+  SLINPUT_DestroyState(state);
+  EXPECT_EQ(allocated_memory_, 0);
+}
