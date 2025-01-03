@@ -187,7 +187,7 @@ int SingleLineInput::CursorControlOut(const SLINPUT_State *state,
 
   const wchar_t *str = SLINPUT_CursorControlTable[cursor_control_code];
   self->output_.append(str);
-  return wcslen(str);
+  return 0;
 }
 
 int SingleLineInput::PutCharOut(const SLINPUT_State *state,
@@ -195,12 +195,12 @@ int SingleLineInput::PutCharOut(const SLINPUT_State *state,
   SingleLineInput *self =
     static_cast<SingleLineInput *>(stream_out.stream_data);
   self->output_.push_back(static_cast<sli_char>(c));
-  return 1;
+  return 0;
 }
 
 int SingleLineInput::FlushOut(const SLINPUT_State *state,
     SLINPUT_Stream stream_out) {
-  return 1;
+  return 0;
 }
 
 int SingleLineInput::GetTerminalWidth(const SLINPUT_State *state,
@@ -247,7 +247,7 @@ TEST_F(SingleLineInput, PrecheckGetInput) {
 TEST_F(SingleLineInput, PrecheckPutCharOut) {
   SLINPUT_Stream stream_out = { this };
   output_ = L"CheckPutCharOut: ";
-  EXPECT_EQ(PutCharOut(nullptr, stream_out, L'A'), 1);
+  EXPECT_EQ(PutCharOut(nullptr, stream_out, L'A'), 0);
   EXPECT_EQ(output_, L"CheckPutCharOut: A");
 }
 
@@ -2164,7 +2164,7 @@ TEST_F(SingleLineInput, ZeroCharacterBuffer) {
   SLINPUT_Set_Streams(state, stream, stream);
   InitState(state);
 
-  sli_char *buffer;  /* Pointer left uninitialized */
+  sli_char *buffer = nullptr;
   terminal_width_ = 20;
 
   /* Characters followed by new line */
@@ -2210,7 +2210,7 @@ TEST_F(SingleLineInput, OneCharacterBuffer) {
     L"[SLINPUT_CCC_WRAP_OFF]"
     /* ApplyDimension and RedrawLine */
     L"[SLINPUT_CCC_DISABLE_CURSOR][SLINPUT_CCC_CLEAR_LINE]>  [SLINPUT_CCC_SAVE_CURSOR] [SLINPUT_CCC_RESTORE_CURSOR][SLINPUT_CCC_ENABLE_CURSOR]"
-    /* Key presses - no characters can be input therefore non are displayed */
+    /* Key presses - no characters can be input therefore none are displayed */
     /* New line */
     L"\n"
     /* Line wrap on */
