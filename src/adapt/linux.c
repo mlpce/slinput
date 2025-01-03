@@ -382,6 +382,7 @@ int SLINPUT_Putchar_Default(
     const SLINPUT_State *state,
     SLINPUT_Stream stream_out,
     sli_char c) {
+  const TermInfo *term_info = &state->term_info;
   size_t num_mchars = 0;
   char *multibyte_buffer;
   wchar_t wide_string[2];
@@ -395,7 +396,7 @@ int SLINPUT_Putchar_Default(
     return -1;
 
   result = fprintf((FILE *)stream_out.stream_data, "%s", multibyte_buffer);
-  free(multibyte_buffer);
+  term_info->free_in(term_info->alloc_info, multibyte_buffer);
 
   if ((size_t) result == num_mchars)
     result = 0;
