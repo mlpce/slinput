@@ -447,8 +447,8 @@ void SLINPUT_Set_Streams(
  */
 SLINPUT_State *SLINPUT_CreateState(
   SLINPUT_AllocInfo alloc_info,
-  SLINPUT_Malloc malloc_cb,
-  SLINPUT_Free free_cb);
+  SLINPUT_Malloc *malloc_cb,
+  SLINPUT_Free *free_cb);
 
 /**
  * Destroys the state, releasing allocated memory and freeing the state.

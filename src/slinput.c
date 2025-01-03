@@ -956,7 +956,7 @@ void SLINPUT_Set_Streams(SLINPUT_State *state,
 /* Creates the state */
 SLINPUT_State *SLINPUT_CreateState(
     SLINPUT_AllocInfo alloc_info,
-    SLINPUT_Malloc malloc_cb, SLINPUT_Free free_cb) {
+    SLINPUT_Malloc *malloc_cb, SLINPUT_Free *free_cb) {
   SLINPUT_CompletionInfo completion_info = { NULL };
   SLINPUT_State *state;
   TermInfo *term_info;
