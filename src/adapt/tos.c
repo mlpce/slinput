@@ -15,12 +15,6 @@
 #error What includes for this compiler?
 #endif
 
-#if (defined(ATARI) && defined(LATTICE))
-#define CCONWS(c) (Cconws(c), 0)
-#else
-#define CCONWS(c) (Cconws(c))
-#endif
-
 #include "include/slinput.h"
 #include "src/slinputi.h"
 
@@ -124,7 +118,12 @@ void SLINPUT_Free_Default(SLINPUT_AllocInfo alloc_info, void *ptr) {
 
 int SLINPUT_Putchar_Default(const SLINPUT_State *state,
     SLINPUT_Stream stream_out, sli_char c) {
-  return c == '\n' ? CCONWS("\n\r") == 0 ? 0 : -1 : (Cconout(c), 0);
+  Cconout(c);
+
+  if (c == '\n')
+    Cconout('\r');
+
+  return 0;
 }
 
 int SLINPUT_Flush_Default(const SLINPUT_State *state,
@@ -234,5 +233,6 @@ int SLINPUT_CursorControl_Default(
     return -1;
 
   code = SLINPUT_CursorControlTable[cursor_control_code];
-  return CCONWS(code) == 0 ? 0 : -1;
+  (void) Cconws(code);
+  return 0;
 }
