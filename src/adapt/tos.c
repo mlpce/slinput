@@ -219,7 +219,7 @@ static const char *SLINPUT_CursorControlTable[SLINPUT_CCC_MAX] = {
   "\033f",    /* SLINPUT_CCC_DISABLE_CURSOR */
   "\033j",    /* SLINPUT_CCC_SAVE_CURSOR */
   "\033k",    /* SLINPUT_CCC_RESTORE_CURSOR */
-  "\033l",    /* SLINPUT_CCC_CLEAR_LINE */
+  "\033l\r",  /* SLINPUT_CCC_CLEAR_LINE */
   "\033v",    /* SLINPUT_CCC_WRAP_ON */
   "\033w"     /* SLINPUT_CCC_WRAP_OFF */
 };
