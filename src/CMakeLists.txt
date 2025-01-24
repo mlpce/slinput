@@ -7,12 +7,16 @@ else()
   set(ADAPT_SOURCES "adapt/linux.c")
 endif()
 
-if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" )
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   # Using GCC
   set(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-parameter -pedantic -Wconversion")
 
   if (ATARI_TOS_ENABLED)
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
+    endif()
+
     set(LIBCMINI_ENABLED OFF CACHE BOOL "Enable libcmini")
     if (LIBCMINI_ENABLED)
       # Using libcmini
