@@ -215,6 +215,7 @@ static int LineBackspace(SLINPUT_State *state) {
 
   int result = 0;
   if (line_info->cursor_ptr > line_info->buffer)  {
+    const sli_char *orig_scroll_ptr;
     sli_char *ptr;
     for (ptr = --line_info->cursor_ptr; ptr < line_info->end_ptr;
         ++ptr) {
@@ -222,10 +223,16 @@ static int LineBackspace(SLINPUT_State *state) {
     }
     --line_info->end_ptr;
 
+    /* Adjust scroll pointer if necessary */
+    orig_scroll_ptr = line_info->scroll_ptr;
     if (line_info->cursor_ptr < line_info->scroll_ptr +
         line_info->cursor_margin) {
       if (line_info->scroll_ptr > line_info->buffer)
         --line_info->scroll_ptr;
+    }
+
+    if (line_info->scroll_ptr != orig_scroll_ptr) {
+      /* Scroll pointer has changed so redraw line */
       result = RedrawLine(state);
     } else {
       /* Backspace */
