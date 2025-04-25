@@ -160,13 +160,18 @@ static __regsused("d0/d1/a0/a1") LONG GetLineA_PB(VOID) =
 /* Create default versions of input and output streams */
 int SLINPUT_CreateStreams_Default(const SLINPUT_State *state,
     SLINPUT_Stream *stream_in, SLINPUT_Stream *stream_out) {
-  const char *env_columns = getenv("SLINPUT_COLUMNS");
   const TermInfo *term_info = &state->term_info;
   TOSInputStream *input = term_info->malloc_in(term_info->alloc_info,
     sizeof(TOSInputStream));
+  const char *env_columns;
 
   if (!input)
     return -1;
+
+  /* Get number of columns environment string if available */
+  env_columns = getenv("SLINPUT_COLUMNS");
+  if (!env_columns)
+    env_columns = getenv("COLUMNS");
 
   input->env_width = 0;
   if (env_columns) {
