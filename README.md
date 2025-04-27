@@ -67,6 +67,8 @@ A simple example application (source code at **src/example/main.c**) will also b
 
 ## Atari ST native compile
 
+There is a script build/tos/zipsrc.sh which can be used to convert the source files to GEMDOS compatible 8.3 filenames and create a zip file, adding the files with LF converted to CRLF.
+
 ### Pure C
 
 Within **build/tos/purec** are two Pure C project files, **slinput.prj** and **slinputx.prj**. The former builds the slinput library as **SLINPUT.LIB**, the latter builds the example executable **SLINPUTX.TOS**. As SLINPUTX.TOS is linked with SLINPUT.LIB, the library must be built first.
