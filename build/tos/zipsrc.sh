@@ -5,6 +5,7 @@ set -e
 # It then creates a zip file, adding the files with LF converted to CRLF.
 
 # Make 8.3 directory structure
+rm -Rfv 8.3/SLINPUT*
 mkdir -p 8.3/SLINPUT/BUILD/TOS/LATTICEC
 mkdir -p 8.3/SLINPUT/BUILD/TOS/PUREC
 mkdir -p 8.3/SLINPUT/INCLUDE
